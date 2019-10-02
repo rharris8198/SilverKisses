@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "842803823033-amjr8qftuprsur06ihk9glt9h4urosmb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.softwareengineering2019.silverkisses",
+            "certificate_hash": "be1f81789491e95d1f8e9b9f7f4da64f872404ee"
+          }
+        },
+        {
           "client_id": "842803823033-4n5j33ogh83g7h31a3pigd4j1f6f2ce5.apps.googleusercontent.com",
           "client_type": 3
         }
