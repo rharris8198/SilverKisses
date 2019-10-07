@@ -1,8 +1,12 @@
 package com.softwareengineering2019.silverkisses;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -24,20 +29,42 @@ import com.google.android.gms.tasks.Task;
 
 import static com.softwareengineering2019.silverkisses.MapsActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 
+
 public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
+    private static final long MIN_TIME = 400;
+    private static final float MIN_DISTANCE = 100;
+
     View myView;
 
     private GoogleMap mMap;
     private MapView mapView;
     private Location mLastKnownLocation;
+    private LocationManager locationManager;
+    private LocationCallback locationCallback;
+
+
     private boolean mLocationPermissionGranted;
     private FusedLocationProviderClient mFusedLocationProviderClient;
 
+
+
+    @SuppressLint("MissingPermission")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         getLocationPermission();
         mFusedLocationProviderClient = new FusedLocationProviderClient(getContext());
+
+
+
+        locationManager = (LocationManager) this.getActivity().getSystemService(Context.LOCATION_SERVICE);
+
+
+
+
         myView = inflater.inflate(R.layout.fragment_exercise, container, false);
+
+
+
 
         // Gets the MapView from the XML layout and creates it
         mapView = (MapView) myView.findViewById(R.id.mapView);
@@ -46,6 +73,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
         // Gets to GoogleMap from the MapView and does initialization stuff
         mapView.getMapAsync(this);
+
 
 
         return myView;
@@ -66,6 +94,9 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
      public void onPause() {
         super.onPause();
         mapView.onPause();
+
+
+
     }
     @Override
     public void onLowMemory() {
@@ -100,18 +131,34 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
+        updateLocationUI();
+
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("Hndler","HAndler");
+                getDeviceLocation();
+                handler.postDelayed(this, 5000);
+            }
+        }, 5000);  //the time is in miliseconds
+
+
 
         // Add a marker in Sydney and move the camera
         // LatLng sydney = new LatLng(-34, 151);
         //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         // mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
-        updateLocationUI();
+
         getDeviceLocation();
+
     }
 
     private void updateLocationUI() {
-        Log.d("UPDATE LOCATION UI","LOCATION");
+        mMap.getUiSettings().setAllGesturesEnabled(false);
+        mMap.getUiSettings().setCompassEnabled(true);
         if (mMap == null) {
             return;
         }
@@ -167,4 +214,8 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
+
+
 }
+
+
