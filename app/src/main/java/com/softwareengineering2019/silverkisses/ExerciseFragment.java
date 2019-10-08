@@ -25,6 +25,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -306,8 +307,8 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                         // Pulling items from the array
                         String point = jArray.getJSONArray(i).getString(9);
                         Log.d("Point: ",point);
-                        convertString(point);
-                        //mMap.addMarker(new MarkerOptions().position(convertString(point)).title("Water fountian"));
+
+                        mMap.addMarker(new MarkerOptions().position(convertStringToPoint(point)).title("Water Fountain"));
 
 
                     } catch (JSONException e) {
@@ -324,22 +325,22 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    public  void convertString(String s){
+    public  LatLng convertStringToPoint(String s){
         String p = s.substring(s.indexOf("("));
         int separator = p.indexOf(' ');
         //Log.d("Sep",Integer.toString(separator));
-        String latitude= p.substring(1,separator);
-        String longitude = p.substring(separator,p.indexOf(")"));
+        String longitude= p.substring(1,separator);
+        String latitude = p.substring(separator,p.indexOf(")"));
         Log.d("Lat", latitude);
         Log.d("Long", longitude);
         //s.substring(s.indexOf("("), s.substring(s.indexOf("("),s.substring(s.indexOf("(")).indexOf(" ")+1).indexOf(" "));
 
-        /*LatLng point = new LatLng(
-                Double.parseDouble(s.substring(s.indexOf("(")+1, s.substring(s.indexOf("(")).indexOf(" "))),
-                Double.parseDouble(s.substring(s.substring(s.indexOf("(")).indexOf(" "),s.indexOf(")")))
+        LatLng point = new LatLng(
+                Double.parseDouble(latitude),
+                Double.parseDouble(longitude)
                 );
-            */
-        //return point;
+
+        return point;
     }
 
 
