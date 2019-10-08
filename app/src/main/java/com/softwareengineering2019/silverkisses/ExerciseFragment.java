@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -27,12 +28,26 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import static com.softwareengineering2019.silverkisses.MapsActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 
 
 public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     private static final long MIN_TIME = 400;
     private static final float MIN_DISTANCE = 100;
+    public static final int CONNECTION_TIMEOUT=10000;
+    public static final int READ_TIMEOUT=15000;
 
     View myView;
 
@@ -73,6 +88,9 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
         // Gets to GoogleMap from the MapView and does initialization stuff
         mapView.getMapAsync(this);
+
+        GetFountainsTask fountainsTask = new GetFountainsTask();
+        fountainsTask.execute();
 
 
 
@@ -212,6 +230,118 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             Log.e("Exception: %s", e.getMessage());
         }
     }
+
+
+
+
+
+    public class GetFountainsTask extends AsyncTask<String, String, String> {
+
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+
+        }
+
+        protected String doInBackground(String... params) {
+
+
+            HttpURLConnection connection = null;
+            BufferedReader reader = null;
+
+            try {
+                URL url = new URL("https://data.cityofnewyork.us/api/views/bevm-apmm/rows.json");
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+
+                InputStream stream = connection.getInputStream();
+
+                reader = new BufferedReader(new InputStreamReader(stream));
+
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line+"\n");
+                    //Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
+
+                }
+
+                return buffer.toString();
+
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            //Log.d("Result: ",result);
+            try {
+                JSONObject jObject = new JSONObject(result);
+                JSONArray jArray = jObject.getJSONArray("data");
+                //Log.d("Data: ",jArray.toString());
+                for (int i=0; i < jArray.length(); i++)
+                {
+                    try {
+                        //JSONObject oneObject = jArray.getJSONObject(i);
+
+                        // Pulling items from the array
+                        String point = jArray.getJSONArray(i).getString(9);
+                        Log.d("Point: ",point);
+                        convertString(point);
+                        //mMap.addMarker(new MarkerOptions().position(convertString(point)).title("Water fountian"));
+
+
+                    } catch (JSONException e) {
+                        // Oops
+                    }
+                }
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+    }
+
+    public  void convertString(String s){
+        String p = s.substring(s.indexOf("("));
+        int separator = p.indexOf(' ');
+        //Log.d("Sep",Integer.toString(separator));
+        String latitude= p.substring(1,separator);
+        String longitude = p.substring(separator,p.indexOf(")"));
+        Log.d("Lat", latitude);
+        Log.d("Long", longitude);
+        //s.substring(s.indexOf("("), s.substring(s.indexOf("("),s.substring(s.indexOf("(")).indexOf(" ")+1).indexOf(" "));
+
+        /*LatLng point = new LatLng(
+                Double.parseDouble(s.substring(s.indexOf("(")+1, s.substring(s.indexOf("(")).indexOf(" "))),
+                Double.parseDouble(s.substring(s.substring(s.indexOf("(")).indexOf(" "),s.indexOf(")")))
+                );
+            */
+        //return point;
+    }
+
 
 
 
