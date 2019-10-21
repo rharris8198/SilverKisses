@@ -31,7 +31,15 @@
             android:layout_width="100dp"
             android:layout_height="wrap_content"
 
-            android:text="Finish" />
+            android:text="Pause" />
+
+        <TextView
+            android:id="@+id/timer"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:text="00:00"
+            android:textSize="30sp" />
     </LinearLayout>
 
 

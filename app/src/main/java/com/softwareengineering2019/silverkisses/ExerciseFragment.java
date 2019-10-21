@@ -8,10 +8,13 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -62,6 +65,18 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     private boolean mLocationPermissionGranted;
     private FusedLocationProviderClient mFusedLocationProviderClient;
 
+    private Button startButton;
+    private Button finishButton;
+    private TextView timer;
+
+
+    private boolean trackingLocation;
+    private boolean paused;
+
+    //vars for time
+    private long MillisecondTime, StartTime, TimeBuff, UpdateTime = 0L ;
+    Handler timeHandler;
+    private int Seconds, Minutes, MilliSeconds ;
 
 
     @SuppressLint("MissingPermission")
@@ -73,6 +88,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
 
         locationManager = (LocationManager) this.getActivity().getSystemService(Context.LOCATION_SERVICE);
+
 
 
 
@@ -92,6 +108,62 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
         GetFountainsTask fountainsTask = new GetFountainsTask();
         fountainsTask.execute();
+
+        startButton= myView.findViewById(R.id.startButton);
+        finishButton= myView.findViewById(R.id.finishButton);
+        timer= myView.findViewById(R.id.timer);
+        timeHandler = new Handler();
+
+        trackingLocation=false; //var to begin location tracking
+        paused=true;
+        finishButton.setEnabled(false);
+
+
+
+
+        startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                trackingLocation=true;
+                paused=false;
+                startButton.setEnabled(false);
+                finishButton.setEnabled(true);
+                StartTime = SystemClock.uptimeMillis();
+                timeHandler.postDelayed(timeRunnable, 0);
+                finishButton.setText("Pause");
+
+            }
+        });
+        finishButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(paused==false) {
+                    paused=true;
+                    trackingLocation = false;
+                    TimeBuff += MillisecondTime;
+                    timeHandler.removeCallbacks(timeRunnable);
+                    startButton.setEnabled(true);
+                    startButton.setText("Resume");
+                    finishButton.setText("Finish");
+                }else if(paused ==true){
+                    MillisecondTime = 0L ;
+                    StartTime = 0L ;
+                    TimeBuff = 0L ;
+                    UpdateTime = 0L ;
+                    Seconds = 0 ;
+                    Minutes = 0 ;
+                    MilliSeconds = 0 ;
+                    timer.setText("00:00");
+                    startButton.setText("Start");
+                    finishButton.setText("Pause");
+                    finishButton.setEnabled(false);
+
+                }
+            }
+        });
+
+
+
 
 
 
@@ -157,8 +229,10 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
+
                 Log.d("Hndler","HAndler");
-                getDeviceLocation();
+                if(trackingLocation)
+                    getDeviceLocation();
                 handler.postDelayed(this, 5000);
             }
         }, 5000);  //the time is in miliseconds
@@ -199,7 +273,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void getDeviceLocation() {
-        Log.d("GETTING LOCATION","LOCATION");
+        //Log.d("GETTING LOCATION","LOCATION");
         /*
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
@@ -306,7 +380,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
                         // Pulling items from the array
                         String point = jArray.getJSONArray(i).getString(9);
-                        Log.d("Point: ",point);
+                       // Log.d("Point: ",point);
 
                         mMap.addMarker(new MarkerOptions().position(convertStringToPoint(point)).title("Water Fountain"));
 
@@ -325,14 +399,38 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    public Runnable timeRunnable = new Runnable() {
+
+        public void run() {
+            MillisecondTime = SystemClock.uptimeMillis() - StartTime;
+
+            UpdateTime = TimeBuff + MillisecondTime;
+
+            Seconds = (int) (UpdateTime / 1000);
+
+            Minutes = Seconds / 60;
+
+            Seconds = Seconds % 60;
+
+            MilliSeconds = (int) (UpdateTime % 1000);
+
+            timer.setText("" + Minutes + ":"
+                    + String.format("%02d", Seconds) /*+ ":"
+                    + String.format("%03d", MilliSeconds)*/);
+
+            timeHandler.postDelayed(this, 0);
+        }
+
+    };
+
     public  LatLng convertStringToPoint(String s){
         String p = s.substring(s.indexOf("("));
         int separator = p.indexOf(' ');
         //Log.d("Sep",Integer.toString(separator));
         String longitude= p.substring(1,separator);
         String latitude = p.substring(separator,p.indexOf(")"));
-        Log.d("Lat", latitude);
-        Log.d("Long", longitude);
+       // Log.d("Lat", latitude);
+        //Log.d("Long", longitude);
         //s.substring(s.indexOf("("), s.substring(s.indexOf("("),s.substring(s.indexOf("(")).indexOf(" ")+1).indexOf(" "));
 
         LatLng point = new LatLng(
