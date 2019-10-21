@@ -3,6 +3,7 @@ package com.softwareengineering2019.silverkisses;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -29,6 +30,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -57,7 +59,9 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private MapView mapView;
-    private Location mLastKnownLocation;
+    private PolylineOptions polylineOptions;
+    private Location currentUserLocation;
+    private Location lastUserLocation;
     private LocationManager locationManager;
     private LocationCallback locationCallback;
 
@@ -101,10 +105,14 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         // Gets the MapView from the XML layout and creates it
         mapView = (MapView) myView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
-
+        polylineOptions = new PolylineOptions();
+        polylineOptions.width(12);
+        polylineOptions.color(Color.RED);
+        polylineOptions.geodesic(true);
 
         // Gets to GoogleMap from the MapView and does initialization stuff
         mapView.getMapAsync(this);
+
 
         GetFountainsTask fountainsTask = new GetFountainsTask();
         fountainsTask.execute();
@@ -157,6 +165,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                     startButton.setText("Start");
                     finishButton.setText("Pause");
                     finishButton.setEnabled(false);
+
 
                 }
             }
@@ -264,7 +273,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
               //  Log.d("LOCATION PERM: ","false");
                 mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                mLastKnownLocation = null;
+                currentUserLocation = null;
                 getLocationPermission();
             }
         } catch (SecurityException e)  {
@@ -286,11 +295,19 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
                             // Set the map's camera position to the current location of the device.
-                            mLastKnownLocation = (Location) task.getResult();
-                            assert mLastKnownLocation != null;
+                            currentUserLocation = (Location) task.getResult();
+                            assert currentUserLocation != null;
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), 17));
+                                    new LatLng(currentUserLocation.getLatitude(),
+                                            currentUserLocation.getLongitude()), 17));
+                            if(lastUserLocation==null){
+                                lastUserLocation=currentUserLocation;
+                            }else{
+                               polylineOptions.add(new LatLng(currentUserLocation.getLatitude(),
+                                       currentUserLocation.getLongitude()));
+                                mMap.addPolyline(polylineOptions);
+                            }
+
                         } else {
                             Log.d("Current location: ", "Current location is null. Using defaults.");
 
@@ -379,6 +396,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                         //JSONObject oneObject = jArray.getJSONObject(i);
 
                         // Pulling items from the array
+
                         String point = jArray.getJSONArray(i).getString(9);
                        // Log.d("Point: ",point);
 
@@ -429,9 +447,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         //Log.d("Sep",Integer.toString(separator));
         String longitude= p.substring(1,separator);
         String latitude = p.substring(separator,p.indexOf(")"));
-       // Log.d("Lat", latitude);
-        //Log.d("Long", longitude);
-        //s.substring(s.indexOf("("), s.substring(s.indexOf("("),s.substring(s.indexOf("(")).indexOf(" ")+1).indexOf(" "));
+
 
         LatLng point = new LatLng(
                 Double.parseDouble(latitude),
