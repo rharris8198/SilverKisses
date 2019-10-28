@@ -144,7 +144,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 StartTime = SystemClock.uptimeMillis();
                 timeHandler.postDelayed(timeRunnable, 0);
                 finishButton.setText("Pause");
-                lastUserLocation = currentUserLocation;
+
 
             }
         });
@@ -174,8 +174,13 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                     finishButton.setText("Pause");
                     finishButton.setEnabled(false);
                     mMap.clear();
+                    polylineOptions = new PolylineOptions();
+                    polylineOptions.width(12);
+                    polylineOptions.color(Color.RED);
+                    polylineOptions.geodesic(true);
+
                     distanceView.setText("0.00");
-                    lastUserLocation = null;
+
                     GetFountainsTask fountainsTask = new GetFountainsTask();
                     fountainsTask.execute();
 
@@ -308,13 +313,16 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
                             // Set the map's camera position to the current location of the device.
-                            currentUserLocation = (Location) task.getResult();
+                            currentUserLocation = ((Location) task.getResult());
                             assert currentUserLocation != null;
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(currentUserLocation.getLatitude(),
                                             currentUserLocation.getLongitude()), 17));
-                            if(lastUserLocation==null){
-                                lastUserLocation=currentUserLocation;
+                            if(lastUserLocation== null){
+                                lastUserLocation = ((Location) task.getResult());
+
+
+
                             }else if(!lastUserLocation.equals(currentUserLocation)){
                                polylineOptions.add(new LatLng(currentUserLocation.getLatitude(),
                                        currentUserLocation.getLongitude()));
@@ -323,6 +331,8 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                                 distance= distance+ (currentUserLocation.distanceTo(lastUserLocation)/1609.344);
 
                                 distanceView.setText(String.format("%.2f",distance));
+                                lastUserLocation.setLatitude(currentUserLocation.getLatitude());
+                                lastUserLocation.setLongitude(currentUserLocation.getLongitude());
                             }
 
                         } else {
@@ -373,7 +383,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
                 while ((line = reader.readLine()) != null) {
                     buffer.append(line+"\n");
-                    Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
+                   // Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
 
                 }
 
