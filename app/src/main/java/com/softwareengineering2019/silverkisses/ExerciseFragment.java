@@ -71,16 +71,19 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
     private Button startButton;
     private Button finishButton;
-    private TextView timer;
-
+    private TextView timerView;
+    private  TextView distanceView;
 
     private boolean trackingLocation;
     private boolean paused;
 
-    //vars for time
+
+
+    //vars for time and distance
     private long MillisecondTime, StartTime, TimeBuff, UpdateTime = 0L ;
     Handler timeHandler;
     private int Seconds, Minutes, MilliSeconds ;
+    private double distance;
 
 
     @SuppressLint("MissingPermission")
@@ -119,7 +122,9 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
         startButton= myView.findViewById(R.id.startButton);
         finishButton= myView.findViewById(R.id.finishButton);
-        timer= myView.findViewById(R.id.timer);
+        timerView= myView.findViewById(R.id.timer);
+        distanceView = myView.findViewById(R.id.distance);
+        distance=0.0;
         timeHandler = new Handler();
 
         trackingLocation=false; //var to begin location tracking
@@ -139,6 +144,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 StartTime = SystemClock.uptimeMillis();
                 timeHandler.postDelayed(timeRunnable, 0);
                 finishButton.setText("Pause");
+                lastUserLocation = currentUserLocation;
 
             }
         });
@@ -161,10 +167,17 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                     Seconds = 0 ;
                     Minutes = 0 ;
                     MilliSeconds = 0 ;
-                    timer.setText("00:00");
+                    distance=0;
+                    distanceView.setText("0.00");
+                    timerView.setText("00:00");
                     startButton.setText("Start");
                     finishButton.setText("Pause");
                     finishButton.setEnabled(false);
+                    mMap.clear();
+                    distanceView.setText("0.00");
+                    lastUserLocation = null;
+                    GetFountainsTask fountainsTask = new GetFountainsTask();
+                    fountainsTask.execute();
 
 
                 }
@@ -242,9 +255,9 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 Log.d("Hndler","HAndler");
                 if(trackingLocation)
                     getDeviceLocation();
-                handler.postDelayed(this, 5000);
+                handler.postDelayed(this, 2000);
             }
-        }, 5000);  //the time is in miliseconds
+        }, 2000);  //the time is in miliseconds
 
 
 
@@ -302,10 +315,14 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                                             currentUserLocation.getLongitude()), 17));
                             if(lastUserLocation==null){
                                 lastUserLocation=currentUserLocation;
-                            }else{
+                            }else if(!lastUserLocation.equals(currentUserLocation)){
                                polylineOptions.add(new LatLng(currentUserLocation.getLatitude(),
                                        currentUserLocation.getLongitude()));
                                 mMap.addPolyline(polylineOptions);
+
+                                distance= distance+ (currentUserLocation.distanceTo(lastUserLocation)/1609.344);
+
+                                distanceView.setText(String.format("%.2f",distance));
                             }
 
                         } else {
@@ -356,7 +373,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
                 while ((line = reader.readLine()) != null) {
                     buffer.append(line+"\n");
-                    //Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
+                    Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
 
                 }
 
@@ -432,7 +449,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
             MilliSeconds = (int) (UpdateTime % 1000);
 
-            timer.setText("" + Minutes + ":"
+            timerView.setText("" + Minutes + ":"
                     + String.format("%02d", Seconds) /*+ ":"
                     + String.format("%03d", MilliSeconds)*/);
 
