@@ -19,10 +19,20 @@
 
         />
 
-    <fragment
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/fragment"
         android:name="com.softwareengineering2019.silverkisses.ExerciseFragment"
         android:layout_width="match_parent"
         android:layout_height="670dp"
-        tools:layout="@layout/fragment_exercise" />
+
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context="MainActivity"
+        tools:showIn="@layout/activity_main"
+        android:padding="1dp"
+        >
+
+    </FrameLayout>
 </RelativeLayout>
