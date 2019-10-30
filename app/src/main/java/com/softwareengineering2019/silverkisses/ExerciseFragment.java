@@ -33,6 +33,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,6 +49,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static com.softwareengineering2019.silverkisses.MapsActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 
@@ -88,7 +95,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
         getLocationPermission();
         mFusedLocationProviderClient = new FusedLocationProviderClient(getContext());
 
@@ -137,6 +144,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 trackingLocation=true;
                 paused=false;
                 startButton.setEnabled(false);
@@ -160,6 +168,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                     startButton.setText("Resume");
                     finishButton.setText("Finish");
                 }else if(paused ==true){
+                    saveWorkout();
                     MillisecondTime = 0L ;
                     StartTime = 0L ;
                     TimeBuff = 0L ;
@@ -257,7 +266,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void run() {
 
-                Log.d("Hndler","HAndler");
+                //Log.d("Hndler","HAndler");
                 if(trackingLocation)
                     getDeviceLocation();
                 handler.postDelayed(this, 2000);
@@ -482,6 +491,18 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 );
 
         return point;
+    }
+
+
+
+    public void saveWorkout(){
+        DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+        Date date = new Date();
+        Workout currentWorkout= new Workout(distance,timerView.getText().toString(),dateFormat.format(date));
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
+        ref.child("workouts").child(currentWorkout.getDate()).setValue(currentWorkout);
+
     }
 
 
