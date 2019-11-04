@@ -258,6 +258,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
+        getDeviceLocation();
         updateLocationUI();
 
 
@@ -281,7 +282,6 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         // mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
 
-        getDeviceLocation();
 
     }
 
