@@ -24,12 +24,13 @@ public class LoginActivity extends AppCompatActivity {
     private Button regBtn;
     private ProgressBar progressBar;
 
+    //Declaring an instance of FirebaseAuth
     private FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        //Initalizing Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
         initializeUI();
@@ -87,7 +88,6 @@ public class LoginActivity extends AppCompatActivity {
     private void initializeUI() {
         emailTV = findViewById(R.id.email);
         passwordTV = findViewById(R.id.password);
-
         loginBtn = findViewById(R.id.login);
         regBtn = findViewById(R.id.register);
         progressBar = findViewById(R.id.progressBar);
