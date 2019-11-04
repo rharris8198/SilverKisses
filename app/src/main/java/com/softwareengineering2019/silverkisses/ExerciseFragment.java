@@ -17,13 +17,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -31,8 +33,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -308,12 +308,57 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+
+    LocationRequest locationRequest;
+    FusedLocationProviderClient fusedLocationClient;
     private void getDeviceLocation() {
+        locationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(30 * 1000)
+                .setFastestInterval(5 * 1000);
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                // Set the map's camera position to the current location of the device.
+                currentUserLocation = (locationResult.getLastLocation());
+                assert currentUserLocation != null;
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(currentUserLocation.getLatitude(),
+                                currentUserLocation.getLongitude()), 17));
+                if(lastUserLocation== null){
+                    lastUserLocation = (locationResult.getLastLocation() );
+
+
+
+                }else if(!lastUserLocation.equals(currentUserLocation)){
+                    polylineOptions.add(new LatLng(currentUserLocation.getLatitude(),
+                            currentUserLocation.getLongitude()));
+                    mMap.addPolyline(polylineOptions);
+
+                    distance= distance+ (currentUserLocation.distanceTo(lastUserLocation)/1609.344);
+
+                    distanceView.setText(String.format("%.2f",distance));
+                    lastUserLocation.setLatitude(currentUserLocation.getLatitude());
+                    lastUserLocation.setLongitude(currentUserLocation.getLongitude());
+                }
+
+            }
+        };
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity().getApplicationContext());
+        if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+
+
         //Log.d("GETTING LOCATION","LOCATION");
         /*
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
-         */
+
         try {
             if (mLocationPermissionGranted) {
                 Task locationResult = mFusedLocationProviderClient.getLastLocation();
@@ -357,8 +402,10 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             }
         } catch(SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
-        }
+        }*/
     }
+
+
 
 
 
