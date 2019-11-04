@@ -317,6 +317,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         try {
             if (mLocationPermissionGranted) {
                 Task locationResult = mFusedLocationProviderClient.getLastLocation();
+
                 locationResult.addOnCompleteListener(this.getActivity(), new OnCompleteListener() {
                     @Override
                     public void onComplete(@NonNull Task task) {

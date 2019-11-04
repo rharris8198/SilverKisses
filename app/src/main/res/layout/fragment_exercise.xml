@@ -60,9 +60,9 @@
             android:text="0.00"
             android:textSize="30sp"
             tools:layout_conversion_absoluteHeight="60dp"
-            tools:layout_editor_absoluteY="353dp"
+            tools:layout_conversion_absoluteWidth="106dp"
             tools:layout_editor_absoluteX="306dp"
-            tools:layout_conversion_absoluteWidth="106dp" />
+            tools:layout_editor_absoluteY="353dp" />
     </LinearLayout>
 
 
