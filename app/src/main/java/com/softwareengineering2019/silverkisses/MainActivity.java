@@ -14,8 +14,6 @@ import androidx.fragment.app.FragmentManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
-    private static int SPLASH_TIME_OUT = 3000;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,19 +21,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         final Fragment exerciseFragment = new ExerciseFragment();
         final Fragment logFragment = new LogFragment();
         final Fragment settingsFragment = new LogFragment();
-        final Fragment moreFragment= new LogFragment();
+        final Fragment moreFragment = new MoreFragment();
         final FragmentManager fm = getSupportFragmentManager();
         final Fragment[] active = {exerciseFragment};
-        fm.beginTransaction().add(R.id.fragment,exerciseFragment, "1").commit();
+        fm.beginTransaction().add(R.id.fragment, exerciseFragment, "1").commit();
         fm.beginTransaction().add(R.id.fragment, logFragment, "2").hide(logFragment).commit();
         fm.beginTransaction().add(R.id.fragment, settingsFragment, "3").hide(settingsFragment).commit();
         fm.beginTransaction().add(R.id.fragment, moreFragment, "4").hide(moreFragment).commit();
-
 
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -51,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                         return true;
 
                     case R.id.Log:
-                       Toast.makeText(MainActivity.this, "Log", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Log", Toast.LENGTH_SHORT).show();
 
                         fm.beginTransaction().hide(active[0]).show(logFragment).commit();
                         active[0] = logFragment;
@@ -63,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                         return true;
 
                     case R.id.More:
-                       Toast.makeText(MainActivity.this, "More", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "More", Toast.LENGTH_SHORT).show();
                         fm.beginTransaction().hide(active[0]).show(moreFragment).commit();
                         active[0] = moreFragment;
 
@@ -75,14 +72,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
     @Override
     public void onStart() {
         super.onStart();
 
 
     }
-
-
 
 
 }

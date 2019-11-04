@@ -16,38 +16,53 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="87dp"
-        android:orientation="horizontal">
+        android:layout_height="252dp"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout2">
 
         <Button
             android:id="@+id/startButton"
-            android:layout_width="100dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:text="Start" />
+            android:text="Start"
+            tools:layout_conversion_absoluteHeight="48dp"
+            tools:layout_editor_absoluteY="356dp"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_conversion_absoluteWidth="100dp" />
 
         <Button
             android:id="@+id/finishButton"
-            android:layout_width="100dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:text="Pause" />
+            android:text="Pause"
+            tools:layout_conversion_absoluteHeight="48dp"
+            tools:layout_editor_absoluteY="356dp"
+            tools:layout_editor_absoluteX="100dp"
+            tools:layout_conversion_absoluteWidth="100dp" />
 
         <TextView
             android:id="@+id/timer"
-            android:layout_width="122dp"
-            android:layout_height="60dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="00:00"
-            android:textSize="30sp" />
+            android:textSize="30sp"
+            tools:layout_conversion_absoluteHeight="60dp"
+            tools:layout_editor_absoluteY="353dp"
+            tools:layout_editor_absoluteX="200dp"
+            tools:layout_conversion_absoluteWidth="106dp" />
 
         <TextView
             android:id="@+id/distance"
-            android:layout_width="122dp"
-            android:layout_height="60dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="0.00"
-            android:textSize="30sp" />
+            android:textSize="30sp"
+            tools:layout_conversion_absoluteHeight="60dp"
+            tools:layout_editor_absoluteY="353dp"
+            tools:layout_editor_absoluteX="306dp"
+            tools:layout_conversion_absoluteWidth="106dp" />
     </LinearLayout>
 
 

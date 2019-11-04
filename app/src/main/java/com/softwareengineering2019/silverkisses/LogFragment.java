@@ -9,10 +9,9 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 
 
-public class LogFragment extends Fragment{
+public class LogFragment extends Fragment {
 
     View myView;
-
 
 
     @SuppressLint("MissingPermission")
@@ -20,13 +19,8 @@ public class LogFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         myView = inflater.inflate(R.layout.fragment_log, container, false);
 
-
-
         return myView;
     }
-
-
-
 }
 
 
