@@ -14,11 +14,12 @@
         android:layout_width="match_parent"
         android:layout_height="353dp" />
 
+
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
-        android:layout_height="252dp"
-        android:orientation="horizontal"
-        android:id="@+id/linearLayout2">
+        android:layout_height="103dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/startButton"
@@ -27,9 +28,9 @@
 
             android:text="Start"
             tools:layout_conversion_absoluteHeight="48dp"
-            tools:layout_editor_absoluteY="356dp"
+            tools:layout_conversion_absoluteWidth="100dp"
             tools:layout_editor_absoluteX="0dp"
-            tools:layout_conversion_absoluteWidth="100dp" />
+            tools:layout_editor_absoluteY="356dp" />
 
         <Button
             android:id="@+id/finishButton"
@@ -38,20 +39,21 @@
 
             android:text="Pause"
             tools:layout_conversion_absoluteHeight="48dp"
-            tools:layout_editor_absoluteY="356dp"
+            tools:layout_conversion_absoluteWidth="100dp"
             tools:layout_editor_absoluteX="100dp"
-            tools:layout_conversion_absoluteWidth="100dp" />
+            tools:layout_editor_absoluteY="356dp" />
 
         <TextView
             android:id="@+id/timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="10sp"
             android:text="00:00"
             android:textSize="30sp"
             tools:layout_conversion_absoluteHeight="60dp"
-            tools:layout_editor_absoluteY="353dp"
+            tools:layout_conversion_absoluteWidth="106dp"
             tools:layout_editor_absoluteX="200dp"
-            tools:layout_conversion_absoluteWidth="106dp" />
+            tools:layout_editor_absoluteY="353dp" />
 
         <TextView
             android:id="@+id/distance"
@@ -63,7 +65,14 @@
             tools:layout_conversion_absoluteWidth="106dp"
             tools:layout_editor_absoluteX="306dp"
             tools:layout_editor_absoluteY="353dp" />
+
     </LinearLayout>
+
+    <Button
+        android:id="@+id/submitBathroomButton"
+        android:layout_width="194dp"
+        android:layout_height="wrap_content"
+        android:text="Submit Bathroom" />
 
 
 </LinearLayout>

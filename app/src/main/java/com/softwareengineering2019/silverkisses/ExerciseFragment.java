@@ -78,6 +78,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
     private Button startButton;
     private Button finishButton;
+    private Button submitBathroomButton;
     private TextView timerView;
     private  TextView distanceView;
 
@@ -98,15 +99,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
         getLocationPermission();
         mFusedLocationProviderClient = new FusedLocationProviderClient(getContext());
-
-
-
         locationManager = (LocationManager) this.getActivity().getSystemService(Context.LOCATION_SERVICE);
-
-
-
-
-
         myView = inflater.inflate(R.layout.fragment_exercise, container, false);
 
 
@@ -131,6 +124,8 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         finishButton= myView.findViewById(R.id.finishButton);
         timerView= myView.findViewById(R.id.timer);
         distanceView = myView.findViewById(R.id.distance);
+        submitBathroomButton= myView.findViewById(R.id.submitBathroomButton);
+
         distance=0.0;
         timeHandler = new Handler();
 
@@ -198,6 +193,13 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
+        submitBathroomButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                submitBathroomLocation();
+                }
+            }
+        );
 
 
 
@@ -250,6 +252,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             ActivityCompat.requestPermissions(this.getActivity(),
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+
         }
     }
 
@@ -302,6 +305,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 currentUserLocation = null;
                 getLocationPermission();
+
             }
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
@@ -352,57 +356,6 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             return;
         }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-
-
-        //Log.d("GETTING LOCATION","LOCATION");
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-
-        try {
-            if (mLocationPermissionGranted) {
-                Task locationResult = mFusedLocationProviderClient.getLastLocation();
-
-                locationResult.addOnCompleteListener(this.getActivity(), new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
-                            currentUserLocation = ((Location) task.getResult());
-                            assert currentUserLocation != null;
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(currentUserLocation.getLatitude(),
-                                            currentUserLocation.getLongitude()), 17));
-                            if(lastUserLocation== null){
-                                lastUserLocation = ((Location) task.getResult());
-
-
-
-                            }else if(!lastUserLocation.equals(currentUserLocation)){
-                               polylineOptions.add(new LatLng(currentUserLocation.getLatitude(),
-                                       currentUserLocation.getLongitude()));
-                                mMap.addPolyline(polylineOptions);
-
-                                distance= distance+ (currentUserLocation.distanceTo(lastUserLocation)/1609.344);
-
-                                distanceView.setText(String.format("%.2f",distance));
-                                lastUserLocation.setLatitude(currentUserLocation.getLatitude());
-                                lastUserLocation.setLongitude(currentUserLocation.getLongitude());
-                            }
-
-                        } else {
-                            Log.d("Current location: ", "Current location is null. Using defaults.");
-
-                            Log.e("exception", "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(-34, 151), 0));
-                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                        }
-                    }
-                });
-            }
-        } catch(SecurityException e)  {
-            Log.e("Exception: %s", e.getMessage());
-        }*/
     }
 
 
@@ -553,8 +506,15 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
+    public void submitBathroomLocation(){
+        Date date = new Date();
+        DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-
+        Bathroom submission = new Bathroom(new LatLng(currentUserLocation.getLatitude(),currentUserLocation.getLongitude()),dateFormat.format(date) + " " + user.getUid());
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("bathrooms").child(submission.getName());
+        ref.setValue(submission);
+    }
 
 
 }
