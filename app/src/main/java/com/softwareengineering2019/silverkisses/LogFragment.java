@@ -21,7 +21,6 @@ public class LogFragment extends Fragment{
         myView = inflater.inflate(R.layout.fragment_log, container, false);
 
 
-
         return myView;
     }
 
