@@ -195,6 +195,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
                     GetFountainsTask fountainsTask = new GetFountainsTask();
                     fountainsTask.execute();
+                    getBathrooms();
 
 
                 }
@@ -542,6 +543,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         Bathroom submission = new Bathroom(new LatLng(currentUserLocation.getLatitude(),currentUserLocation.getLongitude()),dateFormat.format(date) + " " + user.getUid(),0);
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("bathrooms").child(submission.getName());
         ref.setValue(submission);
+
     }
 
 
