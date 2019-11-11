@@ -22,7 +22,7 @@ import com.google.android.gms.tasks.Task;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    public static int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION =1;
+    public static int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
     private Location mLastKnownLocation;
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -67,16 +67,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
-    
-    
+
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-       // LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-       // mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
         updateLocationUI();
         getDeviceLocation();
@@ -96,13 +92,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mLastKnownLocation = null;
                 getLocationPermission();
             }
-        } catch (SecurityException e)  {
+        } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
     }
 
     private void getDeviceLocation() {
-        Log.d("GETTING LOCATION","LOCATION");
+        Log.d("GETTING LOCATION", "LOCATION");
         /*
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
@@ -124,13 +120,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Log.d("Current location: ", "Current location is null. Using defaults.");
 
                             Log.e("exception", "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(-34, 151), 0));
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-34, 151), 0));
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
                 });
             }
-        } catch(SecurityException e)  {
+        } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
     }

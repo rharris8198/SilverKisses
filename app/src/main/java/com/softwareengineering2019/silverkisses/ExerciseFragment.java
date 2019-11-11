@@ -30,7 +30,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,7 +53,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import static com.softwareengineering2019.silverkisses.MapsActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 
@@ -59,8 +64,8 @@ import static com.softwareengineering2019.silverkisses.MapsActivity.PERMISSIONS_
 public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     private static final long MIN_TIME = 400;
     private static final float MIN_DISTANCE = 100;
-    public static final int CONNECTION_TIMEOUT=10000;
-    public static final int READ_TIMEOUT=15000;
+    public static final int CONNECTION_TIMEOUT = 10000;
+    public static final int READ_TIMEOUT = 15000;
 
     View myView;
 
@@ -69,7 +74,6 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     private PolylineOptions polylineOptions;
     private Location currentUserLocation;
     private Location lastUserLocation;
-    private LocationManager locationManager;
     private LocationCallback locationCallback;
 
 
@@ -79,17 +83,16 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     private Button startButton;
     private Button finishButton;
     private TextView timerView;
-    private  TextView distanceView;
+    private TextView distanceView;
 
     private boolean trackingLocation;
     private boolean paused;
 
 
-
     //vars for time and distance
-    private long MillisecondTime, StartTime, TimeBuff, UpdateTime = 0L ;
+    private long MillisecondTime, StartTime, TimeBuff, UpdateTime = 0L;
     Handler timeHandler;
-    private int Seconds, Minutes, MilliSeconds ;
+    private int Seconds, Minutes, MilliSeconds;
     private double distance;
 
 
@@ -100,16 +103,10 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         mFusedLocationProviderClient = new FusedLocationProviderClient(getContext());
 
 
-
-        locationManager = (LocationManager) this.getActivity().getSystemService(Context.LOCATION_SERVICE);
-
-
-
+        LocationManager locationManager = (LocationManager) this.getActivity().getSystemService(Context.LOCATION_SERVICE);
 
 
         myView = inflater.inflate(R.layout.fragment_exercise, container, false);
-
-
 
 
         // Gets the MapView from the XML layout and creates it
@@ -120,33 +117,31 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         polylineOptions.color(Color.RED);
         polylineOptions.geodesic(true);
 
-        // Gets to GoogleMap from the MapView and does initialization stuff
+        // Gets to GoogleMap from the MapView and does initialization
         mapView.getMapAsync(this);
 
 
         GetFountainsTask fountainsTask = new GetFountainsTask();
         fountainsTask.execute();
 
-        startButton= myView.findViewById(R.id.startButton);
-        finishButton= myView.findViewById(R.id.finishButton);
-        timerView= myView.findViewById(R.id.timer);
+        startButton = myView.findViewById(R.id.startButton);
+        finishButton = myView.findViewById(R.id.finishButton);
+        timerView = myView.findViewById(R.id.timer);
         distanceView = myView.findViewById(R.id.distance);
-        distance=0.0;
+        distance = 0.0;
         timeHandler = new Handler();
 
-        trackingLocation=false; //var to begin location tracking
-        paused=true;
+        trackingLocation = false; //var to begin location tracking
+        paused = true;
         finishButton.setEnabled(false);
-
-
 
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                trackingLocation=true;
-                paused=false;
+                trackingLocation = true;
+                paused = false;
                 startButton.setEnabled(false);
                 finishButton.setEnabled(true);
                 StartTime = SystemClock.uptimeMillis();
@@ -159,24 +154,24 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         finishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(paused==false) {
-                    paused=true;
+                if (paused == false) {
+                    paused = true;
                     trackingLocation = false;
                     TimeBuff += MillisecondTime;
                     timeHandler.removeCallbacks(timeRunnable);
                     startButton.setEnabled(true);
                     startButton.setText("Resume");
                     finishButton.setText("Finish");
-                }else if(paused ==true){
+                } else if (paused == true) {
                     saveWorkout();
-                    MillisecondTime = 0L ;
-                    StartTime = 0L ;
-                    TimeBuff = 0L ;
-                    UpdateTime = 0L ;
-                    Seconds = 0 ;
-                    Minutes = 0 ;
-                    MilliSeconds = 0 ;
-                    distance=0;
+                    MillisecondTime = 0L;
+                    StartTime = 0L;
+                    TimeBuff = 0L;
+                    UpdateTime = 0L;
+                    Seconds = 0;
+                    Minutes = 0;
+                    MilliSeconds = 0;
+                    distance = 0;
                     distanceView.setText("0.00");
                     timerView.setText("00:00");
                     startButton.setText("Start");
@@ -199,10 +194,6 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         });
 
 
-
-
-
-
         return myView;
     }
 
@@ -217,19 +208,19 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         super.onResume();
         mapView.onResume();
     }
+
     @Override
-     public void onPause() {
+    public void onPause() {
         super.onPause();
         mapView.onPause();
-
-
-
     }
+
     @Override
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
     }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -268,19 +259,186 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             public void run() {
 
                 //Log.d("Hndler","HAndler");
-                if(trackingLocation)
+                if (trackingLocation)
                     getDeviceLocation();
                 handler.postDelayed(this, 2000);
             }
         }, 2000);  //the time is in miliseconds
 
 
+        // Add a marker at Pace
+        LatLng pace = new LatLng(41.127707, -73.808336);
+        mMap.addMarker(new MarkerOptions().position(pace).title("Pace University Water Fountain"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(pace));
+        //Overriding clicks on Markers
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                    Log.i("onMarkerClick", "Marker clicked executing");
+                // Getting URL to the Google Directions API
+                if (currentUserLocation!=null) {
+                    Log.d("currentUserLocation", currentUserLocation.toString());
+                    String str_origin = "origin=" + currentUserLocation.getLatitude() + "," + currentUserLocation.getLongitude();
+                    LatLng position = marker.getPosition();
+                    String str_dest = "destination=" + position.latitude + "," + position.longitude;
+                    String sensor = "sensor=false";
+                    String parameters = str_origin + "&" + str_dest + "&" + sensor;
+                    String output = "json";
+                    String api_key = "AIzaSyAM0FU1_FBFuNNwP2JPiD1bBRhSd1LhDs8";
+                    String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key=" +api_key;
+                    Log.d("onMapClick", url.toString());
+                    FetchUrl FetchUrl = new FetchUrl();
+                    FetchUrl.execute(url);
+                }
+                return false;
+            }
 
-        // Add a marker in Sydney and move the camera
-        // LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        // mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        });
 
+    }
+
+    private class FetchUrl extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... url) {
+
+            // For storing data from web service
+            String data = "";
+
+            try {
+                // Fetching the data from web service
+                data = downloadUrl(url[0]);
+                Log.d("Background Task data", data.toString());
+            } catch (Exception e) {
+                Log.d("Background Task", e.toString());
+            }
+            return data;
+        }
+
+
+        private String downloadUrl(String strUrl) throws IOException {
+            String data = "";
+            InputStream iStream = null;
+            HttpURLConnection urlConnection = null;
+            try {
+                URL url = new URL(strUrl);
+
+                // Creating an http connection to communicate with url
+                urlConnection = (HttpURLConnection) url.openConnection();
+
+                // Connecting to url
+                urlConnection.connect();
+
+                // Reading data from url
+                iStream = urlConnection.getInputStream();
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+
+                StringBuffer sb = new StringBuffer();
+
+                String line = "";
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                data = sb.toString();
+                Log.d("downloadUrl", data.toString());
+                br.close();
+
+            } catch (Exception e) {
+                Log.d("Exception", e.toString());
+            } finally {
+                iStream.close();
+                urlConnection.disconnect();
+            }
+            return data;
+
+        }
+
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            ParserTask parserTask = new ParserTask();
+
+            // Invokes the thread for parsing the JSON data
+            parserTask.execute(result);
+
+        }
+
+
+    }
+
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        // Parsing the data in non-ui thread
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try {
+                jObject = new JSONObject(jsonData[0]);
+                Log.d("ParserTask",jsonData[0].toString());
+                DataParser parser = new DataParser();
+                Log.d("ParserTask", parser.toString());
+
+                // Starts parsing data
+                routes = parser.parse(jObject);
+                Log.d("ParserTask","Executing routes");
+                Log.d("ParserTask",routes.toString());
+
+            } catch (Exception e) {
+                Log.d("ParserTask",e.toString());
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        // Executes in UI thread, after the parsing process
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+            ArrayList<LatLng> points;
+            PolylineOptions lineOptions = null;
+
+            // Traversing through all the routes
+            for (int i = 0; i < result.size(); i++) {
+                points = new ArrayList<>();
+                lineOptions = new PolylineOptions();
+
+                // Fetching i-th route
+                List<HashMap<String, String>> path = result.get(i);
+
+                // Fetching all the points in i-th route
+                for (int j = 0; j < path.size(); j++) {
+                    HashMap<String, String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                // Adding all the points in the route to LineOptions
+                lineOptions.addAll(points);
+                lineOptions.width(10);
+                lineOptions.color(Color.RED);
+
+                Log.d("onPostExecute","onPostExecute lineoptions decoded");
+
+            }
+
+            // Drawing polyline in the Google Map for the i-th route
+            if(lineOptions != null) {
+                mMap.addPolyline(lineOptions);
+            }
+            else {
+                Log.d("onPostExecute","without Polylines drawn");
+            }
+        }
 
 
     }
@@ -297,13 +455,13 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
-              //  Log.d("LOCATION PERM: ","false");
+                //  Log.d("LOCATION PERM: ","false");
                 mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 currentUserLocation = null;
                 getLocationPermission();
             }
-        } catch (SecurityException e)  {
+        } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
     }
@@ -311,6 +469,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
     LocationRequest locationRequest;
     FusedLocationProviderClient fusedLocationClient;
+
     private void getDeviceLocation() {
         locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
@@ -327,19 +486,18 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                         new LatLng(currentUserLocation.getLatitude(),
                                 currentUserLocation.getLongitude()), 17));
-                if(lastUserLocation== null){
-                    lastUserLocation = (locationResult.getLastLocation() );
+                if (lastUserLocation == null) {
+                    lastUserLocation = (locationResult.getLastLocation());
 
 
-
-                }else if(!lastUserLocation.equals(currentUserLocation)){
+                } else if (!lastUserLocation.equals(currentUserLocation)) {
                     polylineOptions.add(new LatLng(currentUserLocation.getLatitude(),
                             currentUserLocation.getLongitude()));
                     mMap.addPolyline(polylineOptions);
 
-                    distance= distance+ (currentUserLocation.distanceTo(lastUserLocation)/1609.344);
+                    distance = distance + (currentUserLocation.distanceTo(lastUserLocation) / 1609.344);
 
-                    distanceView.setText(String.format("%.2f",distance));
+                    distanceView.setText(String.format("%.2f", distance));
                     lastUserLocation.setLatitude(currentUserLocation.getLatitude());
                     lastUserLocation.setLongitude(currentUserLocation.getLongitude());
                 }
@@ -352,71 +510,13 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             return;
         }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-
-
-        //Log.d("GETTING LOCATION","LOCATION");
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-
-        try {
-            if (mLocationPermissionGranted) {
-                Task locationResult = mFusedLocationProviderClient.getLastLocation();
-
-                locationResult.addOnCompleteListener(this.getActivity(), new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
-                            currentUserLocation = ((Location) task.getResult());
-                            assert currentUserLocation != null;
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(currentUserLocation.getLatitude(),
-                                            currentUserLocation.getLongitude()), 17));
-                            if(lastUserLocation== null){
-                                lastUserLocation = ((Location) task.getResult());
-
-
-
-                            }else if(!lastUserLocation.equals(currentUserLocation)){
-                               polylineOptions.add(new LatLng(currentUserLocation.getLatitude(),
-                                       currentUserLocation.getLongitude()));
-                                mMap.addPolyline(polylineOptions);
-
-                                distance= distance+ (currentUserLocation.distanceTo(lastUserLocation)/1609.344);
-
-                                distanceView.setText(String.format("%.2f",distance));
-                                lastUserLocation.setLatitude(currentUserLocation.getLatitude());
-                                lastUserLocation.setLongitude(currentUserLocation.getLongitude());
-                            }
-
-                        } else {
-                            Log.d("Current location: ", "Current location is null. Using defaults.");
-
-                            Log.e("exception", "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(-34, 151), 0));
-                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                        }
-                    }
-                });
-            }
-        } catch(SecurityException e)  {
-            Log.e("Exception: %s", e.getMessage());
-        }*/
     }
-
-
-
-
-
 
 
     public class GetFountainsTask extends AsyncTask<String, String, String> {
 
         protected void onPreExecute() {
             super.onPreExecute();
-
-
         }
 
         protected String doInBackground(String... params) {
@@ -439,8 +539,8 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 String line = "";
 
                 while ((line = reader.readLine()) != null) {
-                    buffer.append(line+"\n");
-                   // Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
+                    buffer.append(line + "\n");
+                    // Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
 
                 }
 
@@ -466,6 +566,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             return null;
         }
 
+        //Adding water fountain markers to the map
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
@@ -474,15 +575,14 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 JSONObject jObject = new JSONObject(result);
                 JSONArray jArray = jObject.getJSONArray("data");
                 //Log.d("Data: ",jArray.toString());
-                for (int i=0; i < jArray.length(); i++)
-                {
+                for (int i = 0; i < jArray.length(); i++) {
                     try {
                         //JSONObject oneObject = jArray.getJSONObject(i);
 
                         // Pulling items from the array
 
                         String point = jArray.getJSONArray(i).getString(9);
-                       // Log.d("Point: ",point);
+                        // Log.d("Point: ",point);
 
                         mMap.addMarker(new MarkerOptions().position(convertStringToPoint(point)).title("Water Fountain"));
 
@@ -501,62 +601,49 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    //Implementing a stopwatch
     public Runnable timeRunnable = new Runnable() {
 
         public void run() {
             MillisecondTime = SystemClock.uptimeMillis() - StartTime;
-
             UpdateTime = TimeBuff + MillisecondTime;
-
             Seconds = (int) (UpdateTime / 1000);
-
             Minutes = Seconds / 60;
-
             Seconds = Seconds % 60;
-
             MilliSeconds = (int) (UpdateTime % 1000);
-
-            timerView.setText("" + Minutes + ":"
-                    + String.format("%02d", Seconds) /*+ ":"
-                    + String.format("%03d", MilliSeconds)*/);
-
+            timerView.setText(new StringBuilder().append("").append(Minutes).append(":").append(String.format("%02d", Seconds)).toString());
             timeHandler.postDelayed(this, 0);
         }
 
     };
 
-    public  LatLng convertStringToPoint(String s){
+    public LatLng convertStringToPoint(String s) {
         String p = s.substring(s.indexOf("("));
         int separator = p.indexOf(' ');
         //Log.d("Sep",Integer.toString(separator));
-        String longitude= p.substring(1,separator);
-        String latitude = p.substring(separator,p.indexOf(")"));
+        String longitude = p.substring(1, separator);
+        String latitude = p.substring(separator, p.indexOf(")"));
 
 
         LatLng point = new LatLng(
                 Double.parseDouble(latitude),
                 Double.parseDouble(longitude)
-                );
+        );
 
         return point;
     }
 
 
-
-    public void saveWorkout(){
+    //Saving user workouts in Firebase
+    public void saveWorkout() {
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
         Date date = new Date();
-        Workout currentWorkout= new Workout(distance,timerView.getText().toString(),dateFormat.format(date));
+        Workout currentWorkout = new Workout(distance, timerView.getText().toString(), dateFormat.format(date));
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
         ref.child("workouts").child(currentWorkout.getDate()).setValue(currentWorkout);
 
     }
 
-
-
-
-
 }
-
 
