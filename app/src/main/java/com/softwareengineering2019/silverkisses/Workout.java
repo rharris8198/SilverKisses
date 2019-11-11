@@ -12,8 +12,13 @@ public class Workout {
         this.date = date;
 
     }
+    public Workout(){
+
+    }
 
     public Double getDistance() {
+
+
         return distance;
     }
 
