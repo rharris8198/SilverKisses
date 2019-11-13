@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -30,13 +31,20 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,7 +59,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import static com.softwareengineering2019.silverkisses.MapsActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 
@@ -78,13 +89,14 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
     private Button startButton;
     private Button finishButton;
+    private Button submitBathroomButton;
     private TextView timerView;
     private  TextView distanceView;
 
     private boolean trackingLocation;
     private boolean paused;
 
-
+    private ArrayList<Bathroom> bathrooms;
 
     //vars for time and distance
     private long MillisecondTime, StartTime, TimeBuff, UpdateTime = 0L ;
@@ -98,6 +110,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
         getLocationPermission();
         mFusedLocationProviderClient = new FusedLocationProviderClient(getContext());
+        bathrooms= new ArrayList<Bathroom>();
 
 
 
@@ -126,11 +139,13 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
         GetFountainsTask fountainsTask = new GetFountainsTask();
         fountainsTask.execute();
+        getBathrooms();
 
         startButton= myView.findViewById(R.id.startButton);
         finishButton= myView.findViewById(R.id.finishButton);
         timerView= myView.findViewById(R.id.timer);
         distanceView = myView.findViewById(R.id.distance);
+        submitBathroomButton= myView.findViewById(R.id.submitBathroomButton);
         distance=0.0;
         timeHandler = new Handler();
 
@@ -192,13 +207,20 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
                     GetFountainsTask fountainsTask = new GetFountainsTask();
                     fountainsTask.execute();
+                    getBathrooms();
 
 
                 }
             }
         });
 
-
+        submitBathroomButton.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        submitBathroomLocation();
+                                                    }
+                                                }
+        );
 
 
 
@@ -273,20 +295,189 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 handler.postDelayed(this, 2000);
             }
         }, 2000);  //the time is in miliseconds
+// Add a marker at Pace
+        LatLng pace = new LatLng(41.127707, -73.808336);
+        mMap.addMarker(new MarkerOptions().position(pace).title("Pace University Water Fountain"));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(pace));
+        //Overriding clicks on Markers
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                Log.i("onMarkerClick", "Marker clicked executing");
+                // Getting URL to the Google Directions API
+                if (currentUserLocation!=null) {
+                    Log.d("currentUserLocation", currentUserLocation.toString());
+                    String str_origin = "origin=" + currentUserLocation.getLatitude() + "," + currentUserLocation.getLongitude();
+                    LatLng position = marker.getPosition();
+                    String str_dest = "destination=" + position.latitude + "," + position.longitude;
+                    String sensor = "sensor=false";
+                    String parameters = str_origin + "&" + str_dest + "&" + sensor;
+                    String output = "json";
+                    String api_key = "AIzaSyAM0FU1_FBFuNNwP2JPiD1bBRhSd1LhDs8";
+                    String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key=" +api_key;
+                    Log.d("onMapClick", url.toString());
+                    FetchUrl FetchUrl = new FetchUrl();
+                    FetchUrl.execute(url);
+                }
+                return false;
+            }
+
+        });
+
+    }
+
+    private class FetchUrl extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... url) {
+
+            // For storing data from web service
+            String data = "";
+
+            try {
+                // Fetching the data from web service
+                data = downloadUrl(url[0]);
+                Log.d("Background Task data", data.toString());
+            } catch (Exception e) {
+                Log.d("Background Task", e.toString());
+            }
+            return data;
+        }
 
 
+        private String downloadUrl(String strUrl) throws IOException {
+            String data = "";
+            InputStream iStream = null;
+            HttpURLConnection urlConnection = null;
+            try {
+                URL url = new URL(strUrl);
 
-        // Add a marker in Sydney and move the camera
-        // LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        // mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+                // Creating an http connection to communicate with url
+                urlConnection = (HttpURLConnection) url.openConnection();
 
+                // Connecting to url
+                urlConnection.connect();
+
+                // Reading data from url
+                iStream = urlConnection.getInputStream();
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+
+                StringBuffer sb = new StringBuffer();
+
+                String line = "";
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                data = sb.toString();
+                Log.d("downloadUrl", data.toString());
+                br.close();
+
+            } catch (Exception e) {
+                Log.d("Exception", e.toString());
+            } finally {
+                iStream.close();
+                urlConnection.disconnect();
+            }
+            return data;
+
+        }
+
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            ParserTask parserTask = new ParserTask();
+
+            // Invokes the thread for parsing the JSON data
+            parserTask.execute(result);
+
+        }
 
 
     }
 
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        // Parsing the data in non-ui thread
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try {
+                jObject = new JSONObject(jsonData[0]);
+                Log.d("ParserTask",jsonData[0].toString());
+                DataParser parser = new DataParser();
+                Log.d("ParserTask", parser.toString());
+
+                // Starts parsing data
+                routes = parser.parse(jObject);
+                Log.d("ParserTask","Executing routes");
+                Log.d("ParserTask",routes.toString());
+
+            } catch (Exception e) {
+                Log.d("ParserTask",e.toString());
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        // Executes in UI thread, after the parsing process
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+            ArrayList<LatLng> points;
+            PolylineOptions lineOptions = null;
+
+            // Traversing through all the routes
+            for (int i = 0; i < result.size(); i++) {
+                points = new ArrayList<>();
+                lineOptions = new PolylineOptions();
+
+                // Fetching i-th route
+                List<HashMap<String, String>> path = result.get(i);
+
+                // Fetching all the points in i-th route
+                for (int j = 0; j < path.size(); j++) {
+                    HashMap<String, String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                // Adding all the points in the route to LineOptions
+                lineOptions.addAll(points);
+                lineOptions.width(10);
+                lineOptions.color(Color.RED);
+
+                Log.d("onPostExecute","onPostExecute lineoptions decoded");
+
+            }
+
+            // Drawing polyline in the Google Map for the i-th route
+            if(lineOptions != null) {
+                mMap.addPolyline(lineOptions);
+            }
+            else {
+                Log.d("onPostExecute","without Polylines drawn");
+            }
+        }
+
+
+    }
+
+
+
+
+
     private void updateLocationUI() {
-        mMap.getUiSettings().setAllGesturesEnabled(false);
+        mMap.getUiSettings().setAllGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
         if (mMap == null) {
             return;
@@ -333,13 +524,15 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
 
                 }else if(!lastUserLocation.equals(currentUserLocation)){
-                    polylineOptions.add(new LatLng(currentUserLocation.getLatitude(),
-                            currentUserLocation.getLongitude()));
-                    mMap.addPolyline(polylineOptions);
+                    if(trackingLocation) {
+                        polylineOptions.add(new LatLng(currentUserLocation.getLatitude(),
+                                currentUserLocation.getLongitude()));
+                        mMap.addPolyline(polylineOptions);
 
-                    distance= distance+ (currentUserLocation.distanceTo(lastUserLocation)/1609.344);
+                        distance = distance + (currentUserLocation.distanceTo(lastUserLocation) / 1609.344);
 
-                    distanceView.setText(String.format("%.2f",distance));
+                        distanceView.setText(String.format("%.2f", distance));
+                    }
                     lastUserLocation.setLatitude(currentUserLocation.getLatitude());
                     lastUserLocation.setLongitude(currentUserLocation.getLongitude());
                 }
@@ -354,10 +547,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
 
 
-        //Log.d("GETTING LOCATION","LOCATION");
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
+
 
         try {
             if (mLocationPermissionGranted) {
@@ -402,7 +592,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             }
         } catch(SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
-        }*/
+        }
     }
 
 
@@ -552,6 +742,39 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         ref.child("workouts").child(currentWorkout.getDate()).setValue(currentWorkout);
 
     }
+
+    public void getBathrooms(){
+        DatabaseReference ref= FirebaseDatabase.getInstance().getReference("bathrooms");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    Log.d("CHILD: ", child.getValue().toString());
+                    Bathroom bath=child.getValue(Bathroom.class);
+                    bathrooms.add(child.getValue(Bathroom.class));
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(bath.getLat(),bath.getLng())).title("Bathroom").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                }
+                Log.d("bathrooms: ", bathrooms.toString());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void submitBathroomLocation(){
+        Date date = new Date();
+        DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        Bathroom submission = new Bathroom(new LatLng(currentUserLocation.getLatitude(),currentUserLocation.getLongitude()),dateFormat.format(date) + " " + user.getUid(),0);
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("bathrooms").child(submission.getName());
+        ref.setValue(submission);
+
+    }
+
 
 
 
