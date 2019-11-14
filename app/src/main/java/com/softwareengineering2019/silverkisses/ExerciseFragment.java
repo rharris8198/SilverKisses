@@ -1,9 +1,11 @@
 package com.softwareengineering2019.silverkisses;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -104,6 +106,8 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     private int Seconds, Minutes, MilliSeconds ;
     private double distance;
 
+    Dialog myDialog;
+
 
     @SuppressLint("MissingPermission")
     @Override
@@ -121,6 +125,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
 
         myView = inflater.inflate(R.layout.fragment_exercise, container, false);
+        myDialog = new Dialog(this.getContext());
 
 
 
@@ -295,35 +300,92 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 handler.postDelayed(this, 2000);
             }
         }, 2000);  //the time is in miliseconds
-// Add a marker at Pace
+
+
+        // Add a marker at Pace
         LatLng pace = new LatLng(41.127707, -73.808336);
         mMap.addMarker(new MarkerOptions().position(pace).title("Pace University Water Fountain"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(pace));
+
+
+
+
         //Overriding clicks on Markers
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
                 Log.i("onMarkerClick", "Marker clicked executing");
-                // Getting URL to the Google Directions API
-                if (currentUserLocation!=null) {
-                    Log.d("currentUserLocation", currentUserLocation.toString());
-                    String str_origin = "origin=" + currentUserLocation.getLatitude() + "," + currentUserLocation.getLongitude();
-                    LatLng position = marker.getPosition();
-                    String str_dest = "destination=" + position.latitude + "," + position.longitude;
-                    String sensor = "sensor=false";
-                    String parameters = str_origin + "&" + str_dest + "&" + sensor;
-                    String output = "json";
-                    String api_key = "AIzaSyAM0FU1_FBFuNNwP2JPiD1bBRhSd1LhDs8";
-                    String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key=" +api_key;
-                    Log.d("onMapClick", url.toString());
-                    FetchUrl FetchUrl = new FetchUrl();
-                    FetchUrl.execute(url);
-                }
+                LatLng position = marker.getPosition();
+                showPopup(myView,position,marker.getTitle());
                 return false;
             }
 
         });
 
+    }
+
+
+    public void showPopup( View v, final LatLng position, String title) {
+        TextView txtclose;
+        TextView titleTxt;
+        Button routeBtn;
+        Button plusBtn;
+        Button minusBtn;
+
+
+
+        myDialog.setContentView(R.layout.bathroominfowindowlayout);
+        txtclose =(TextView) myDialog.findViewById(R.id.txtclose);
+        txtclose.setText("X");
+
+
+        txtclose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        titleTxt = myDialog.findViewById(R.id.title);
+        titleTxt.setText((CharSequence) title);
+
+        plusBtn = myDialog.findViewById(R.id.btnplus);
+        minusBtn = myDialog.findViewById(R.id.btnminus);
+        routeBtn = myDialog.findViewById(R.id.routebutton);
+
+        routeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                myDialog.dismiss();
+                displayRoute(position);
+
+
+            }
+        });
+
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
+    }
+
+   
+
+    public void displayRoute(LatLng position){
+        // Getting URL to the Google Directions API
+        if (currentUserLocation!=null) {
+            Log.d("currentUserLocation", currentUserLocation.toString());
+            String str_origin = "origin=" + currentUserLocation.getLatitude() + "," + currentUserLocation.getLongitude();
+
+            String str_dest = "destination=" + position.latitude + "," + position.longitude;
+            String sensor = "sensor=false";
+            String parameters = str_origin + "&" + str_dest + "&" + sensor;
+            String output = "json";
+            String api_key = "AIzaSyAM0FU1_FBFuNNwP2JPiD1bBRhSd1LhDs8";
+            String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key=" +api_key;
+            Log.d("onMapClick", url.toString());
+            FetchUrl FetchUrl = new FetchUrl();
+            FetchUrl.execute(url);
+        }
     }
 
     private class FetchUrl extends AsyncTask<String, Void, String> {
@@ -454,7 +516,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 // Adding all the points in the route to LineOptions
                 lineOptions.addAll(points);
                 lineOptions.width(10);
-                lineOptions.color(Color.RED);
+                lineOptions.color(Color.BLUE);
 
                 Log.d("onPostExecute","onPostExecute lineoptions decoded");
 
@@ -694,6 +756,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     public Runnable timeRunnable = new Runnable() {
 
         public void run() {
+
             MillisecondTime = SystemClock.uptimeMillis() - StartTime;
 
             UpdateTime = TimeBuff + MillisecondTime;
@@ -752,7 +815,21 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                     Log.d("CHILD: ", child.getValue().toString());
                     Bathroom bath=child.getValue(Bathroom.class);
                     bathrooms.add(child.getValue(Bathroom.class));
-                    mMap.addMarker(new MarkerOptions().position(new LatLng(bath.getLat(),bath.getLng())).title("Bathroom").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                    MarkerOptions markerOptions = new MarkerOptions()
+                            .position(new LatLng(bath.getLat(),bath.getLng())).title("Bathroom")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                           // .snippet("Rating: " + bath.getRating());
+
+                    InfoWindowData info = new InfoWindowData();
+                    info.setName("Bathroom");
+                    info.setRating(bath.getRating());
+                    info.setBathroom(bath);
+
+
+                   Marker marker = mMap.addMarker(markerOptions);
+
+                    //marker.setTag(info);
+                    //marker.showInfoWindow();
                 }
                 Log.d("bathrooms: ", bathrooms.toString());
             }
@@ -774,6 +851,9 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         ref.setValue(submission);
 
     }
+
+
+
 
 
 
