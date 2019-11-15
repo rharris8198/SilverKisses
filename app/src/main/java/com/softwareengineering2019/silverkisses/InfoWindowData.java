@@ -3,6 +3,8 @@ package com.softwareengineering2019.silverkisses;
 public class InfoWindowData {
     private int  rating;
     private String name;
+    private Bathroom bathroom;
+
 
     public Bathroom getBathroom() {
         return bathroom;
@@ -12,7 +14,6 @@ public class InfoWindowData {
         this.bathroom = bathroom;
     }
 
-    private Bathroom bathroom;
 
     public int getRating() {
         return rating;

@@ -99,6 +99,8 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     private boolean paused;
 
     private ArrayList<Bathroom> bathrooms;
+    private ArrayList<Bathroom> fountains;
+
 
     //vars for time and distance
     private long MillisecondTime, StartTime, TimeBuff, UpdateTime = 0L ;
@@ -303,8 +305,13 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
 
         // Add a marker at Pace
+        InfoWindowData info = new InfoWindowData();
+        info.setName("Pace Water Fountain");
+        info.setRating(0);
+        info.setBathroom(null);
         LatLng pace = new LatLng(41.127707, -73.808336);
-        mMap.addMarker(new MarkerOptions().position(pace).title("Pace University Water Fountain"));
+        mMap.addMarker(new MarkerOptions().position(pace).title("Pace University Water Fountain")).setTag(info);
+
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(pace));
 
 
@@ -316,13 +323,19 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             public boolean onMarkerClick(Marker marker) {
                 Log.i("onMarkerClick", "Marker clicked executing");
                 LatLng position = marker.getPosition();
-                showPopup(myView,position,marker.getTitle());
+                InfoWindowData tag = (InfoWindowData) marker.getTag();
+                if(tag.getName() == "Bathroom"){
+                    showPopup(myView,position,marker.getTitle(),tag.getBathroom());
+                }else {
+                    showPopup(myView, position, marker.getTitle());
+                }
                 return false;
             }
 
         });
 
     }
+
 
 
     public void showPopup( View v, final LatLng position, String title) {
@@ -350,9 +363,13 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         titleTxt.setText((CharSequence) title);
 
         plusBtn = myDialog.findViewById(R.id.btnplus);
-        minusBtn = myDialog.findViewById(R.id.btnminus);
-        routeBtn = myDialog.findViewById(R.id.routebutton);
+        //plusBtn.setVisibility(View.INVISIBLE);
 
+
+        minusBtn = myDialog.findViewById(R.id.btnminus);
+        //minusBtn.setVisibility(View.INVISIBLE);
+
+        routeBtn = myDialog.findViewById(R.id.routebutton);
         routeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -364,11 +381,94 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
+
         myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         myDialog.show();
     }
 
-   
+    public void showPopup(View v, final LatLng position, String title, final Bathroom bathroom) {
+        TextView txtclose;
+        TextView titleTxt;
+        Button routeBtn;
+        Button plusBtn;
+        Button minusBtn;
+
+
+
+        myDialog.setContentView(R.layout.bathroominfowindowlayout);
+        txtclose =(TextView) myDialog.findViewById(R.id.txtclose);
+        txtclose.setText("X");
+
+
+        txtclose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        titleTxt = myDialog.findViewById(R.id.title);
+        titleTxt.setText((CharSequence) title);
+
+        plusBtn = myDialog.findViewById(R.id.btnplus);
+        plusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("PLUS","RATING");
+                rateBathroom(1,bathroom);}
+        });
+
+
+        minusBtn = myDialog.findViewById(R.id.btnminus);
+        minusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rateBathroom(-1,bathroom);}
+        });
+
+
+        routeBtn = myDialog.findViewById(R.id.routebutton);
+        routeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                myDialog.dismiss();
+                displayRoute(position);
+
+
+            }
+        });
+
+
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
+    }
+
+    public void rateBathroom(final int rating, final Bathroom bathroom ){
+
+        final DatabaseReference ref= FirebaseDatabase.getInstance()
+                .getReference("bathrooms")
+                .child(bathroom.getName());
+
+
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Bathroom dbBathroom = dataSnapshot.getValue(Bathroom.class);
+                dbBathroom.setRating(dbBathroom.getRating()+rating);
+                ref.setValue(dbBathroom);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+
+
 
     public void displayRoute(LatLng position){
         // Getting URL to the Google Directions API
@@ -661,8 +761,6 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
 
 
-
-
     public class GetFountainsTask extends AsyncTask<String, String, String> {
 
         protected void onPreExecute() {
@@ -736,7 +834,23 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                         String point = jArray.getJSONArray(i).getString(9);
                        // Log.d("Point: ",point);
 
-                        mMap.addMarker(new MarkerOptions().position(convertStringToPoint(point)).title("Water Fountain"));
+
+                        MarkerOptions markerOptions = new MarkerOptions()
+                                .position((convertStringToPoint(point)))
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+
+
+                        InfoWindowData info = new InfoWindowData();
+                        info.setName("NYC Water Fountain");
+                        info.setRating(0);
+                        info.setBathroom(null);
+
+
+                        Marker marker = mMap.addMarker(markerOptions);
+
+                        marker.setTag(info);
+
+                       // mMap.addMarker(new MarkerOptions().position(convertStringToPoint(point)).title("Water Fountain"));
 
 
                     } catch (JSONException e) {
@@ -808,28 +922,30 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
     public void getBathrooms(){
         DatabaseReference ref= FirebaseDatabase.getInstance().getReference("bathrooms");
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+        ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     Log.d("CHILD: ", child.getValue().toString());
-                    Bathroom bath=child.getValue(Bathroom.class);
-                    bathrooms.add(child.getValue(Bathroom.class));
-                    MarkerOptions markerOptions = new MarkerOptions()
-                            .position(new LatLng(bath.getLat(),bath.getLng())).title("Bathroom")
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-                           // .snippet("Rating: " + bath.getRating());
+                    Bathroom bath = child.getValue(Bathroom.class);
+                    if (bath.getRating() > -5) {
+                        bathrooms.add(bath);
+                        MarkerOptions markerOptions = new MarkerOptions()
+                                .position(new LatLng(bath.getLat(), bath.getLng())).title("Bathroom")
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                        // .snippet("Rating: " + bath.getRating());
 
-                    InfoWindowData info = new InfoWindowData();
-                    info.setName("Bathroom");
-                    info.setRating(bath.getRating());
-                    info.setBathroom(bath);
+                        InfoWindowData info = new InfoWindowData();
+                        info.setName("Bathroom");
+                        info.setRating(bath.getRating());
+                        info.setBathroom(bath);
 
 
-                   Marker marker = mMap.addMarker(markerOptions);
+                        Marker marker = mMap.addMarker(markerOptions);
 
-                    //marker.setTag(info);
-                    //marker.showInfoWindow();
+                        marker.setTag(info);
+                        //marker.showInfoWindow();
+                    }
                 }
                 Log.d("bathrooms: ", bathrooms.toString());
             }

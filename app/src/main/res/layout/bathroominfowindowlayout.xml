@@ -79,7 +79,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="25dp"
-                android:text="+"
+                android:text = "&#x1f44d;"
                 android:textColor="@color/white" />
             <Button
                 android:id="@+id/btnminus"
@@ -87,7 +87,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="25dp"
-                android:text="-"
+                android:text="&#x1f44e;"
                 android:textColor="@color/white" />
         </LinearLayout>
 

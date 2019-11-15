@@ -5,6 +5,11 @@ import com.google.android.gms.maps.model.LatLng;
 public class Bathroom {
     //private LatLng location;
     private String name;
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
     private int rating;
     private double lat;
     private  double lng;
@@ -30,4 +35,5 @@ public class Bathroom {
     public int getRating(){
         return rating;
     }
+
 }
