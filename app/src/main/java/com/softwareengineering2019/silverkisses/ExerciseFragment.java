@@ -38,6 +38,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -98,12 +99,14 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
     private  Button waterBreakButton;
     private  Button bathroomBreakButton;
+    private  Button clearRouteButton;
+    private Polyline helperRoute;
 
     private boolean trackingLocation;
     private boolean paused;
 
     private ArrayList<Bathroom> bathrooms;
-    private ArrayList<Bathroom> fountains;
+    private ArrayList<Bathroom> fountains;//fountains saved as bathrooms for simplicity
 
     private  ArrayList<String> ratedLocations;
 
@@ -124,6 +127,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         user = FirebaseAuth.getInstance().getCurrentUser();
         mFusedLocationProviderClient = new FusedLocationProviderClient(getContext());
         bathrooms= new ArrayList<Bathroom>();
+        fountains = new ArrayList<Bathroom>();
         ratedLocations = new ArrayList<String>();
 
 
@@ -135,7 +139,6 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
         myView = inflater.inflate(R.layout.fragment_exercise, container, false);
         myDialog = new Dialog(this.getContext());
-
 
 
 
@@ -238,17 +241,45 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                                                 }
         );
 
+        helperRoute = null;
         waterBreakButton = myView.findViewById(R.id.waterBreakButton);
         bathroomBreakButton = myView.findViewById(R.id.bathroomBreakButton);
+        clearRouteButton = myView.findViewById(R.id.clearRouteButton);
+
+
+        clearRouteButton.setEnabled(false);
 
         bathroomBreakButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 LatLng nearest = getNearestBathroom();
                 displayRoute(nearest);
+
             }
         });
 
+        waterBreakButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LatLng nearest = getNearestFountain();
+                displayRoute(nearest);
+            }
+        });
+
+        clearRouteButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(helperRoute!=null) {
+                            helperRoute.remove();
+                        }
+                        bathroomBreakButton.setEnabled(true);
+                        waterBreakButton.setEnabled(true);
+                        clearRouteButton.setEnabled(false);
+
+                    }
+                }
+        );
 
 
 
@@ -329,8 +360,9 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         info.setName("Pace Water Fountain");
         info.setRating(0);
         info.setBathroom(null);
-        LatLng pace = new LatLng(41.127707, -73.808336);
+        LatLng pace = new LatLng(41.127707, -73.8065);
         mMap.addMarker(new MarkerOptions().position(pace).title("Pace University Water Fountain")).setTag(info);
+        fountains.add(new Bathroom(pace,"Pace Water Fountain",0));
 
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(pace));
 
@@ -673,7 +705,13 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
             // Drawing polyline in the Google Map for the i-th route
             if(lineOptions != null) {
-                mMap.addPolyline(lineOptions);
+                if(helperRoute!=null) {
+                    helperRoute.remove();
+                }
+               helperRoute= mMap.addPolyline(lineOptions);
+               // bathroomBreakButton.setEnabled(false);
+                //waterBreakButton.setEnabled(false);
+                clearRouteButton.setEnabled(true);
             }
             else {
                 Log.d("onPostExecute","without Polylines drawn");
@@ -892,7 +930,10 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                         InfoWindowData info = new InfoWindowData();
                         info.setName("NYC Water Fountain");
                         info.setRating(0);
-                        info.setBathroom(null);
+                        info.setBathroom(null);//null because will not be rated
+
+
+                        fountains.add(new Bathroom(convertStringToPoint(point),"NYC Water Fountain",0));
 
 
                         Marker marker = mMap.addMarker(markerOptions);
@@ -1051,6 +1092,28 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
             if(currentUserLocation.distanceTo(currentBathroomLocation)<shortestDistance) {
                 shortestDistance = currentUserLocation.distanceTo(currentBathroomLocation);
+                nearest=current;
+            }
+
+
+        }
+
+        return new LatLng(nearest.getLat(),nearest.getLng());
+    }
+    public LatLng getNearestFountain(){
+        Bathroom nearest= fountains.get(0);
+        Bathroom current;
+        Location currentFountainLocation = new Location("");
+        currentFountainLocation.setLatitude(nearest.getLat());
+        currentFountainLocation.setLongitude(nearest.getLng());
+        double shortestDistance=  currentUserLocation.distanceTo(currentFountainLocation);
+        for(int i=0;i<bathrooms.size();i++) {
+            current = bathrooms.get(i);
+            currentFountainLocation.setLatitude(current.getLat());
+            currentFountainLocation.setLongitude(current.getLng());
+
+            if(currentUserLocation.distanceTo(currentFountainLocation)<shortestDistance) {
+                shortestDistance = currentUserLocation.distanceTo(currentFountainLocation);
                 nearest=current;
             }
 
