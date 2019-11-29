@@ -12,27 +12,31 @@ public class Bathroom {
 
     private int rating;
     private double lat;
-    private  double lng;
+    private double lng;
 
     public Bathroom(LatLng location, String name, int rating) {
-        this.lng=location.longitude;
-        this.lat=location.latitude;
+        this.lng = location.longitude;
+        this.lat = location.latitude;
         this.name = name;
-        this.rating=0;
+        this.rating = 0;
     }
-    public Bathroom(){}
+
+    public Bathroom() {
+    }
 
     public double getLat() {
         return lat;
     }
-    public double getLng(){
+
+    public double getLng() {
         return lng;
     }
+
     public String getName() {
         return name;
     }
 
-    public int getRating(){
+    public int getRating() {
         return rating;
     }
 

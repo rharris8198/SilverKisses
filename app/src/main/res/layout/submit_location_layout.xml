@@ -32,9 +32,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp"
-            android:text="Bathroom"
+            android:text="Submit Current Location"
             android:textColor="@color/white"
             android:textStyle="bold" />
+        <Spinner
+            android:id="@+id/locationTypeDropdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/btn_dropdown"
+            android:spinnerMode="dropdown" />
 
         <Button
             android:id="@+id/submitbutton"
@@ -42,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp"
-            android:text="Show Route"
+            android:text="Submit"
             android:textColor="@color/white" />
     </LinearLayout>
 
@@ -53,47 +59,10 @@
         android:orientation="horizontal">
 
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-
-            android:gravity="center"
-            android:orientation="vertical">
-
-
-            <TextView
-                android:id="@+id/rateMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Rate this location"
-                android:textColor="@color/white"
-                android:textSize="18sp" />
-        </LinearLayout>
-
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <Button
-                android:id="@+id/btnplus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="25dp"
-                android:text="&#x1f44d;"
-                android:textColor="@color/white" />
-
-            <Button
-                android:id="@+id/btnminus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="25dp"
-                android:text="&#x1f44e;"
-                android:textColor="@color/white" />
-        </LinearLayout>
+            android:orientation="vertical"/>
 
     </LinearLayout>
 

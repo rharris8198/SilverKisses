@@ -17,8 +17,11 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -117,7 +120,8 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     private int Seconds, Minutes, MilliSeconds ;
     private double distance;
 
-    Dialog myDialog;
+    Dialog locationInformationDialog;
+    Dialog submitLocationDialog;
 
     FirebaseUser user;
     @SuppressLint("MissingPermission")
@@ -138,7 +142,8 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
 
         myView = inflater.inflate(R.layout.fragment_exercise, container, false);
-        myDialog = new Dialog(this.getContext());
+        locationInformationDialog = new Dialog(this.getContext());
+        submitLocationDialog = new Dialog(this.getContext());
 
 
 
@@ -154,9 +159,14 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         mapView.getMapAsync(this);
 
 
+        //get water fountains from NYC
         GetFountainsTask fountainsTask = new GetFountainsTask();
         fountainsTask.execute();
+
+        //get water fountains and bathrooms from db
+        getFountains();
         getBathrooms();
+        //get list of current user rated locations from db
         getRatedLocations();
 
 
@@ -236,7 +246,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         submitBathroomButton.setOnClickListener(new View.OnClickListener() {
                                                     @Override
                                                     public void onClick(View v) {
-                                                        submitBathroomLocation();
+                                                 submitLocationPopup(myView);
                                                     }
                                                 }
         );
@@ -286,6 +296,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         return myView;
     }
 
+    //map override functions
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -316,6 +327,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         mapView.onSaveInstanceState(outState);
     }
 
+    //request location permission
     private void getLocationPermission() {
         /*
          * Request location permission, so that we can get the location of the
@@ -334,6 +346,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
+    //set up map
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
@@ -360,9 +373,9 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         info.setName("Pace Water Fountain");
         info.setRating(0);
         info.setBathroom(null);
-        LatLng pace = new LatLng(41.127707, -73.8065);
-        mMap.addMarker(new MarkerOptions().position(pace).title("Pace University Water Fountain")).setTag(info);
-        fountains.add(new Bathroom(pace,"Pace Water Fountain",0));
+        //LatLng pace = new LatLng(41.127707, -73.8065);
+        //mMap.addMarker(new MarkerOptions().position(pace).title("Pace University Water Fountain")).setTag(info);
+       // fountains.add(new Bathroom(pace,"Pace Water Fountain",0));
 
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(pace));
 
@@ -377,9 +390,9 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 LatLng position = marker.getPosition();
                 InfoWindowData tag = (InfoWindowData) marker.getTag();
                 if(tag.getName() == "Bathroom"){
-                    showPopup(myView,position,marker.getTitle(),tag.getBathroom());
+                    showInformationPopup(myView,position,marker.getTitle(),tag.getBathroom());
                 }else {
-                    showPopup(myView, position, marker.getTitle());
+                    showInformationPopup(myView, position, marker.getTitle());
                 }
                 return false;
             }
@@ -390,7 +403,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
 
     //show popup for NYC database Fountains unrateable
-    public void showPopup( View v, final LatLng position, String title) {
+    public void showInformationPopup(View v, final LatLng position, String title) {
         TextView txtclose;
         TextView titleTxt;
         TextView rateLabel;
@@ -400,48 +413,48 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
 
 
-        myDialog.setContentView(R.layout.bathroominfowindowlayout);
-        txtclose =(TextView) myDialog.findViewById(R.id.txtclose);
+        locationInformationDialog.setContentView(R.layout.bathroominfowindowlayout);
+        txtclose =(TextView) locationInformationDialog.findViewById(R.id.txtclose);
         txtclose.setText("X");
 
 
         txtclose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myDialog.dismiss();
+                locationInformationDialog.dismiss();
             }
         });
 
-        titleTxt = myDialog.findViewById(R.id.title);
+        titleTxt = locationInformationDialog.findViewById(R.id.title);
         titleTxt.setText((CharSequence) title);
 
-        routeBtn = myDialog.findViewById(R.id.routebutton);
+        routeBtn = locationInformationDialog.findViewById(R.id.submitbutton);
         routeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myDialog.dismiss();
+                locationInformationDialog.dismiss();
                 displayRoute(position);
             }
         });
 
-        plusBtn = myDialog.findViewById(R.id.btnplus);
+        plusBtn = locationInformationDialog.findViewById(R.id.btnplus);
         plusBtn.setVisibility(View.GONE);
 
-        minusBtn = myDialog.findViewById(R.id.btnminus);
+        minusBtn = locationInformationDialog.findViewById(R.id.btnminus);
         minusBtn.setVisibility(View.GONE);
 
-        rateLabel = myDialog.findViewById(R.id.rateMessage);
+        rateLabel = locationInformationDialog.findViewById(R.id.rateMessage);
         rateLabel.setVisibility(View.GONE);
 
 
 
-        myDialog.getWindow().setGravity(Gravity.TOP);
-        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        myDialog.show();
+        locationInformationDialog.getWindow().setGravity(Gravity.TOP);
+        locationInformationDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        locationInformationDialog.show();
     }
 
     //show popup for rateable bathrooms
-    public void showPopup(View v, final LatLng position, final String title, final Bathroom bathroom) {
+    public void showInformationPopup(View v, final LatLng position, final String title, final Bathroom bathroom) {
         TextView txtclose;
         TextView titleTxt;
         final TextView rateLabel;
@@ -451,32 +464,32 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
 
 
-        myDialog.setContentView(R.layout.bathroominfowindowlayout);
-        txtclose =(TextView) myDialog.findViewById(R.id.txtclose);
+        locationInformationDialog.setContentView(R.layout.bathroominfowindowlayout);
+        txtclose =(TextView) locationInformationDialog.findViewById(R.id.txtclose);
         txtclose.setText("X");
 
         txtclose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myDialog.dismiss();
+                locationInformationDialog.dismiss();
             }
         });
 
-        titleTxt = myDialog.findViewById(R.id.title);
+        titleTxt = locationInformationDialog.findViewById(R.id.title);
         titleTxt.setText((CharSequence) title);
 
-        routeBtn = myDialog.findViewById(R.id.routebutton);
+        routeBtn = locationInformationDialog.findViewById(R.id.submitbutton);
         routeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myDialog.dismiss();
+                locationInformationDialog.dismiss();
                 displayRoute(position);
             }
         });
 
-        rateLabel = myDialog.findViewById(R.id.rateMessage);
-        plusBtn = myDialog.findViewById(R.id.btnplus);
-        minusBtn = myDialog.findViewById(R.id.btnminus);
+        rateLabel = locationInformationDialog.findViewById(R.id.rateMessage);
+        plusBtn = locationInformationDialog.findViewById(R.id.btnplus);
+        minusBtn = locationInformationDialog.findViewById(R.id.btnminus);
         //check if user has already rated this location
         if(ratedLocations.contains(bathroom.getName())) {
             //already rated
@@ -488,8 +501,11 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             plusBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-                    rateBathroom(1, bathroom);
+                    if(bathroom.getName().charAt(0)=='F')
+                        rateFountain(1,bathroom);
+                    else {
+                        rateBathroom(1, bathroom);
+                    }
                     rateLabel.setText("Thanks for rating this location");
                     plusBtn.setVisibility(View.INVISIBLE);
                     minusBtn.setVisibility(View.INVISIBLE);
@@ -502,7 +518,11 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             minusBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    rateBathroom(-1, bathroom);
+                    if(bathroom.getName().charAt(0)=='F')
+                        rateFountain(-1,bathroom);
+                    else {
+                        rateBathroom(-1, bathroom);
+                    }
                     rateLabel.setText("Thanks for rating this location");
                     plusBtn.setVisibility(View.GONE);
                     minusBtn.setVisibility(View.GONE);
@@ -513,11 +533,72 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         }
 
 
-        myDialog.getWindow().setGravity(Gravity.TOP);
-        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        myDialog.show();
+        locationInformationDialog.getWindow().setGravity(Gravity.TOP);
+        locationInformationDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        locationInformationDialog.show();
     }
 
+    public void submitLocationPopup(View v){
+        TextView txtclose;
+        final Spinner dropdown;
+        Button submitButton;
+
+        submitLocationDialog.setContentView(R.layout.submit_location_layout);
+
+
+        txtclose =(TextView) submitLocationDialog.findViewById(R.id.txtclose);
+        txtclose.setText("X");
+        txtclose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                submitLocationDialog.dismiss();
+            }
+        });
+
+        dropdown = submitLocationDialog.findViewById(R.id.locationTypeDropdown);
+        String[] items = new String[]{"Bathroom", "Water Fountain"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(),android.R.layout.simple_spinner_dropdown_item, items);
+        dropdown.setAdapter(adapter);
+        dropdown.setPrompt("Select a location type");
+
+        submitButton = submitLocationDialog.findViewById(R.id.submitbutton);
+        submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(dropdown.getSelectedItem().toString().equals("Bathroom")) {
+                    Location nearBathroom = new Location("");
+                    nearBathroom.setLatitude(getNearestBathroom().latitude);
+                    nearBathroom.setLongitude(getNearestBathroom().longitude);
+
+                    if(currentUserLocation.distanceTo(nearBathroom)>15) {
+                        submitBathroomLocation();
+                    }else{
+                        Toast.makeText(getActivity(), "This location is already marked", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else{
+                    Location nearFountain = new Location("");
+                    nearFountain.setLatitude(getNearestFountain().latitude);
+                    nearFountain.setLongitude(getNearestFountain().longitude);
+
+                    if(currentUserLocation.distanceTo(nearFountain)>15) {
+                        submitFountainLocation();
+                    }else{
+                        Toast.makeText(getActivity(), "This location is already marked", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+
+
+            }
+        });
+
+        submitLocationDialog.getWindow().setGravity(Gravity.TOP);
+        submitLocationDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        submitLocationDialog.show();
+    }
+
+    //modify rating of bathroom in database
     public void rateBathroom(final int rating, final Bathroom bathroom ){
 
 
@@ -547,10 +628,42 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
+    //modify rating of bathroom in database
+    public void rateFountain(final int rating, final Bathroom bathroom ){
+
+
+        final DatabaseReference ref= FirebaseDatabase.getInstance()
+                .getReference("fountains")
+                .child(bathroom.getName());
+
+
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //update rating of location in db
+                Bathroom dbBathroom = dataSnapshot.getValue(Bathroom.class);
+                dbBathroom.setRating(dbBathroom.getRating()+rating);
+                ref.setValue(dbBathroom);
+                ratedLocations.add(dbBathroom.getName());
+
+                //add to list of locations rated by this user
+                DatabaseReference addRating = FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).child("rated");
+                addRating.setValue(ratedLocations);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 
 
 
 
+
+
+    //functions and classes for displaying helper routes
     public void displayRoute(LatLng position){
         // Getting URL to the Google Directions API
         if (currentUserLocation!=null) {
@@ -724,7 +837,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
 
 
-
+    //show users location
     private void updateLocationUI() {
         mMap.getUiSettings().setAllGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
@@ -747,8 +860,6 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
             Log.e("Exception: %s", e.getMessage());
         }
     }
-
-
     LocationRequest locationRequest;
     FusedLocationProviderClient fusedLocationClient;
     private void getDeviceLocation() {
@@ -847,7 +958,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
 
 
-
+    //get fountains from nyc database
     public class GetFountainsTask extends AsyncTask<String, String, String> {
 
         protected void onPreExecute() {
@@ -927,7 +1038,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
 
-                        InfoWindowData info = new InfoWindowData();
+                       InfoWindowData info = new InfoWindowData();
                         info.setName("NYC Water Fountain");
                         info.setRating(0);
                         info.setBathroom(null);//null because will not be rated
@@ -957,6 +1068,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    //used to update time while exercising
     public Runnable timeRunnable = new Runnable() {
 
         public void run() {
@@ -982,6 +1094,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
     };
 
+    //helper for parsing fountain data
     public  LatLng convertStringToPoint(String s){
         String p = s.substring(s.indexOf("("));
         int separator = p.indexOf(' ');
@@ -998,8 +1111,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         return point;
     }
 
-
-
+    //save workout to firebase
     public void saveWorkout(){
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
         Date date = new Date();
@@ -1009,7 +1121,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         ref.child("workouts").child(currentWorkout.getDate()).setValue(currentWorkout);
 
     }
-
+    //get bathrooms from firebase
     public void getBathrooms(){
         DatabaseReference ref= FirebaseDatabase.getInstance().getReference("bathrooms");
         ref.addValueEventListener(new ValueEventListener() {
@@ -1047,6 +1159,47 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
+    //get fountains from database
+    //get bathrooms from firebase
+
+    public void getFountains(){
+        DatabaseReference ref= FirebaseDatabase.getInstance().getReference("fountains");
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    Log.d("CHILD: ", child.getValue().toString());
+                    Bathroom fountain = child.getValue(Bathroom.class);
+                    if (fountain.getRating() > -5) {
+                        fountains.add(fountain);
+                        MarkerOptions markerOptions = new MarkerOptions()
+                                .position(new LatLng(fountain.getLat(), fountain.getLng())).title("Water Fountain")
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                        // .snippet("Rating: " + bath.getRating());
+
+                        InfoWindowData info = new InfoWindowData();
+                        info.setName("Bathroom");
+                        info.setRating(fountain.getRating());
+                        info.setBathroom(fountain);
+
+
+                        Marker marker = mMap.addMarker(markerOptions);
+
+                        marker.setTag(info);
+                        //marker.showInfoWindow();
+                    }
+                }
+                //Log.d("bathrooms: ", bathrooms.toString());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    //add bathroom to database
     public void submitBathroomLocation(){
         Date date = new Date();
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
@@ -1058,6 +1211,19 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
+    //add bathroom to database
+    public void submitFountainLocation(){
+        Date date = new Date();
+        DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        Bathroom submission = new Bathroom(new LatLng(currentUserLocation.getLatitude(),currentUserLocation.getLongitude()),"F"+dateFormat.format(date) + " " + user.getUid(),0);
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("fountains").child(submission.getName());
+        ref.setValue(submission);
+
+    }
+
+    //get list of locations user has already rated
     public void getRatedLocations(){
         DatabaseReference ref= FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).child("rated");
         ref.addValueEventListener(new ValueEventListener() {
@@ -1077,7 +1243,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         });
 
     }
-
+    //returns position of closest bathroom/fountain
     public LatLng getNearestBathroom(){
         Bathroom nearest= bathrooms.get(0);
         Bathroom current;
@@ -1107,8 +1273,8 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
         currentFountainLocation.setLatitude(nearest.getLat());
         currentFountainLocation.setLongitude(nearest.getLng());
         double shortestDistance=  currentUserLocation.distanceTo(currentFountainLocation);
-        for(int i=0;i<bathrooms.size();i++) {
-            current = bathrooms.get(i);
+        for(int i=0;i<fountains.size();i++) {
+            current = fountains.get(i);
             currentFountainLocation.setLatitude(current.getLat());
             currentFountainLocation.setLongitude(current.getLng());
 
