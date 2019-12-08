@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UserProfileFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/common_google_signin_btn_text_dark_default"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Firstname LastName"
+            android:textAlignment="center"
+            android:textSize="24sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="145dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/profilePicture"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_weight="1"
+                android:background="@drawable/app_logo_2" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/numWorkouts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Workouts Completed: " />
+
+        <TextView
+            android:id="@+id/numMiles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Total Miles: " />
+
+        <TextView
+            android:id="@+id/timeSpent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Total Time:" />
+
+        <TextView
+            android:id="@+id/longestDistance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Longest Distance: " />
+
+        <TextView
+            android:id="@+id/longestDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Longest Duration: " />
+
+    </LinearLayout>
+
+</FrameLayout>

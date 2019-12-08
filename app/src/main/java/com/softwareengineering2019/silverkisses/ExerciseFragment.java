@@ -1085,7 +1085,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
 
             MilliSeconds = (int) (UpdateTime % 1000);
 
-            timerView.setText("" + Minutes + ":"
+            timerView.setText("" + String.format("%02d", Minutes) + ":"
                     + String.format("%02d", Seconds) /*+ ":"
                     + String.format("%03d", MilliSeconds)*/);
 
@@ -1115,6 +1115,7 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
     public void saveWorkout(){
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
         Date date = new Date();
+
         Workout currentWorkout= new Workout(distance,timerView.getText().toString(),dateFormat.format(date));
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());

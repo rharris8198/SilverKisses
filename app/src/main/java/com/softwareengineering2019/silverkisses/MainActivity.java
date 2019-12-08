@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
         final Fragment exerciseFragment = new ExerciseFragment();
         final Fragment logFragment = new LogFragment();
-        final Fragment settingsFragment = new LogFragment();
+        final Fragment settingsFragment = new UserProfileFragment();
         final Fragment moreFragment = new MoreFragment();
         final FragmentManager fm = getSupportFragmentManager();
         final Fragment[] active = {exerciseFragment};
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                         active[0] = logFragment;
                         return true;
                     case R.id.Settings:
-                        Toast.makeText(MainActivity.this, "Settings", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "MyProfile", Toast.LENGTH_SHORT).show();
                         fm.beginTransaction().hide(active[0]).show(settingsFragment).commit();
                         active[0] = settingsFragment;
                         return true;
