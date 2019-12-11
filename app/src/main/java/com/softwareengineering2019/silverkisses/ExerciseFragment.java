@@ -195,7 +195,8 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                 finishButton.setEnabled(true);
                 StartTime = SystemClock.uptimeMillis();
                 timeHandler.postDelayed(timeRunnable, 0);
-                finishButton.setText("Pause");
+                //finishButton.setText("Pause");
+                finishButton.setBackgroundResource(R.drawable.pause);
 
 
             }
@@ -209,8 +210,9 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                     TimeBuff += MillisecondTime;
                     timeHandler.removeCallbacks(timeRunnable);
                     startButton.setEnabled(true);
-                    startButton.setText("Resume");
-                    finishButton.setText("Finish");
+                    //startButton.setText("Resume");
+                    //finishButton.setText("Finish");
+                    finishButton.setBackgroundResource(R.drawable.stop);
                 }else if(paused ==true){
                     saveWorkout();
                     MillisecondTime = 0L ;
@@ -223,8 +225,9 @@ public class ExerciseFragment extends Fragment implements OnMapReadyCallback {
                     distance=0;
                     distanceView.setText("0.00");
                     timerView.setText("00:00");
-                    startButton.setText("Start");
-                    finishButton.setText("Pause");
+                    //startButton.setText("Start");
+                    //finishButton.setText("Pause");
+                    finishButton.setBackgroundResource(R.drawable.pause);
                     finishButton.setEnabled(false);
                     mMap.clear();
                     polylineOptions = new PolylineOptions();

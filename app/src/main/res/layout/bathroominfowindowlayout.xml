@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
@@ -23,7 +25,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="111dp"
         android:orientation="vertical">
 
         <TextView
@@ -32,18 +34,26 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp"
+            android:fontFamily="casual"
             android:text="Bathroom"
+            android:textAlignment="center"
             android:textColor="@color/white"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <Button
             android:id="@+id/submitbutton"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp"
-            android:text="Show Route"
-            android:textColor="@color/white" />
+            android:background="@color/colorPrimaryDark"
+            android:fontFamily="casual"
+            android:padding="12dp"
+            android:text="SHOW ROUTE"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
@@ -53,49 +63,51 @@
         android:orientation="horizontal">
 
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/rateMessage"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-
-            android:gravity="center"
-            android:orientation="vertical">
-
-
-            <TextView
-                android:id="@+id/rateMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Rate this location"
-                android:textColor="@color/white"
-                android:textSize="18sp" />
-        </LinearLayout>
-
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <Button
-                android:id="@+id/btnplus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="25dp"
-                android:text="&#x1f44d;"
-                android:textColor="@color/white" />
-
-            <Button
-                android:id="@+id/btnminus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="25dp"
-                android:text="&#x1f44e;"
-                android:textColor="@color/white" />
-        </LinearLayout>
+            android:autoSizeTextType="none"
+            android:fallbackLineSpacing="false"
+            android:fontFamily="casual"
+            android:text="Rate this location by giving it a thumbs up or down!"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
 
     </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/btnplus"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginEnd="30dp"
+            android:text="&#x1f44d;"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnminus"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginStart="30dp"
+            android:text="&#x1f44e;"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>
 

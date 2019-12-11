@@ -39,7 +39,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         @Override
         public void onBindViewHolder(ListAdapter.ViewHolder holder, int i) {
                 holder.dateView.setText(workouts.get(i).getDate().substring(0,10));
-                holder.contentView.setText("Duration: " + workouts.get(i).getDuration() + " Distance: " + String.format("%.1f", workouts.get(i).getDistance()));
+                holder.contentView.setText("Distance: " + String.format("%.1f", workouts.get(i).getDistance()) +" miles; Duration: " + workouts.get(i).getDuration());
                 if(i %2 == 1)
                 {
                         holder.itemView.setBackgroundColor(Color.parseColor("#FFFFFF"));

@@ -12,17 +12,22 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Account login"/>
+        android:fontFamily="casual"
+        android:text="Account login"
+        android:textStyle="bold" />
+
     <EditText
         android:id="@+id/email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="casual"
         android:hint="Email" />
 
     <EditText
         android:id="@+id/password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="casual"
         android:hint="Password"
         android:inputType="textPassword" />
 
@@ -30,12 +35,19 @@
         android:id="@+id/login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login" />
+        android:fontFamily="casual"
+        android:text="Login"
+        android:textColor="@color/colorPrimaryDark"
+        android:textStyle="bold" />
+
     <Button
         android:id="@+id/register"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Register" />
+        android:fontFamily="casual"
+        android:text="Register"
+        android:textColor="@color/colorPrimaryDark"
+        android:textStyle="bold" />
 
     <ProgressBar
         android:id="@+id/progressBar"

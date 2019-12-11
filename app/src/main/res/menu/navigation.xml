@@ -16,9 +16,4 @@
         android:icon="@android:drawable/ic_menu_myplaces"
         android:title="My Profile" />
 
-    <item
-        android:id="@+id/More"
-        android:icon="@drawable/ic_more"
-        android:title="More" />
-
 </menu>

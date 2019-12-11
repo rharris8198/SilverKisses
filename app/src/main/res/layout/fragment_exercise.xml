@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -12,114 +13,194 @@
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
-        android:layout_height="350dp" />
+        android:layout_height="300dp" />
     <LinearLayout
 
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayout7"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="10dp">
+            android:background="@color/colorPrimaryDark">
 
             <Button
                 android:id="@+id/startButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="49dp"
+                android:layout_height="43dp"
 
-                android:text="Start" />
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/start"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/finishButton"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <Button
                 android:id="@+id/finishButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
 
-                android:text="Pause" />
+                android:background="@drawable/pause"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/timer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="10sp"
+                android:layout_marginStart="8dp"
+                android:fontFamily="casual"
                 android:text="00:00"
-                android:textSize="30sp"
-                tools:layout_conversion_absoluteHeight="60dp"
-                tools:layout_conversion_absoluteWidth="106dp"
-                tools:layout_editor_absoluteX="200dp"
-                tools:layout_editor_absoluteY="353dp" />
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/imageView"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/distance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="135dp"
+                android:fontFamily="casual"
                 android:text="0.00"
-                android:textSize="30sp"
-                tools:layout_conversion_absoluteHeight="60dp"
-                tools:layout_conversion_absoluteWidth="106dp"
-                tools:layout_editor_absoluteX="306dp"
-                tools:layout_editor_absoluteY="353dp" />
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        </LinearLayout>
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="27dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/stopwatch"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.48" />
 
-        <LinearLayout
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="casual"
+                android:text="MILES"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/distance"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayout8"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:weightSum="2"
+            android:layout_height="100dp"
+            android:layout_marginBottom="0dp"
             android:gravity="center_horizontal"
-            android:orientation="horizontal"
-            android:paddingTop="10dp">
-
-            <Button
-                android:id="@+id/waterBreakButton"
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:layout_weight="1"
-                android:text="&#128167;"
-
-                />
+            android:weightSum="2">
 
             <Button
                 android:id="@+id/bathroomBreakButton"
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:layout_weight="1"
-                android:text="&#128169;"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
 
-                />
+                android:layout_marginEnd="20dp"
+                android:background="@color/colorPrimaryDark"
+                android:fontFamily="casual"
+                android:padding="6dp"
+                android:text="&#128169; RESTROOM"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <Button
+                android:id="@+id/waterBreakButton"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_marginStart="20dp"
+                android:background="@color/colorPrimaryDark"
+                android:fontFamily="casual"
+                android:padding="6dp"
+                android:text="&#128167; WATER FOUNTAIN"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/bathroomBreakButton"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/textView7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="6dp"
+                android:fontFamily="casual"
+                android:text="Route to:"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayout9"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
 
-            android:gravity="center_horizontal"
-            android:orientation="horizontal"
-            android:paddingTop="10dp">
+            android:layout_height="150dp"
+            android:layout_marginBottom="0dp"
+            android:gravity="center_horizontal">
 
             <Button
                 android:id="@+id/clearRouteButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Clear Route"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
 
-                />
+                android:layout_marginBottom="64dp"
+                android:fontFamily="casual"
+                android:text="Clear Route"
+                android:textColor="@color/white"
+                android:textSize="30sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <Button
                 android:id="@+id/submitBathroomButton"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Submit a Location" />
+                android:layout_height="50dp"
+                android:fontFamily="casual"
+                android:text="Submit a Location"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.502"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/clearRouteButton"
+                app:layout_constraintVertical_bias="0.0" />
 
 
-        </LinearLayout>
-
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     </LinearLayout>
+
 </LinearLayout>

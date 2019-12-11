@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 
 
 public class UserProfileFragment extends Fragment {
+    Button logOutBtn;
     View myView;
     TextView name;
     TextView workoutsCompleted;
@@ -62,6 +64,13 @@ public class UserProfileFragment extends Fragment {
         getWorkouts();
         getData();
 
+        logOutBtn = myView.findViewById(R.id.logOut);
+        logOutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logoutUserAccount();
+            }
+        });
 
         return myView;
     }
@@ -91,6 +100,13 @@ public class UserProfileFragment extends Fragment {
 
 
 
+    }
+
+    private void logoutUserAccount(){
+        FirebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(getActivity(), LoginActivity.class);
+        startActivity(intent);
+        Toast.makeText(getActivity(), "Logout Successfully!", Toast.LENGTH_SHORT).show();
     }
 
     public void getWorkouts(){
@@ -124,19 +140,19 @@ public class UserProfileFragment extends Fragment {
                             maxtime = time;
                         totalSeconds +=  time;
                     }
-                    workoutsCompleted.setText("Workouts Completed: " + numWorkouts);
-                    totalMiles.setText("Total Miles: " + totalDistance);
-                    longestDistance.setText("Longest Workout: " + maxDistance);
+                    workoutsCompleted.setText(Integer.toString(numWorkouts));
+                    totalMiles.setText(Double.toString(totalDistance));
+                    longestDistance.setText(Double.toString(maxDistance));
                     int secs = totalSeconds%60;
-                    totalDuration.setText("Total Time: " + (totalSeconds/60) +":" + String.format("%02d", secs));
+                    totalDuration.setText((totalSeconds/60) +":" + String.format("%02d", secs));
                     secs = maxtime%60;
-                    longestDuration.setText("Longest Duration: " + (maxtime/60) + ":" + String.format("%02d", secs));
+                    longestDuration.setText((maxtime/60) + ":" + String.format("%02d", secs));
                 }else{
-                    workoutsCompleted.setText("Workouts Completed: " + numWorkouts);
-                    totalMiles.setText("Total Miles: -");
-                    longestDistance.setText("Longest Workout: -");
-                    totalDuration.setText("Total Time: -" );
-                    longestDuration.setText("Longest Duration: -");
+                    workoutsCompleted.setText(Integer.toString(numWorkouts));
+                    totalMiles.setText("-");
+                    longestDistance.setText("-");
+                    totalDuration.setText("-" );
+                    longestDuration.setText("-");
                 }
 
             }

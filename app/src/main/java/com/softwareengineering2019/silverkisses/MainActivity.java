@@ -26,13 +26,13 @@ public class MainActivity extends AppCompatActivity {
         final Fragment exerciseFragment = new ExerciseFragment();
         final Fragment logFragment = new LogFragment();
         final Fragment settingsFragment = new UserProfileFragment();
-        final Fragment moreFragment = new MoreFragment();
+       // final Fragment moreFragment = new MoreFragment();
         final FragmentManager fm = getSupportFragmentManager();
         final Fragment[] active = {exerciseFragment};
         fm.beginTransaction().add(R.id.fragment, exerciseFragment, "1").commit();
         fm.beginTransaction().add(R.id.fragment, logFragment, "2").hide(logFragment).commit();
         fm.beginTransaction().add(R.id.fragment, settingsFragment, "3").hide(settingsFragment).commit();
-        fm.beginTransaction().add(R.id.fragment, moreFragment, "4").hide(moreFragment).commit();
+       // fm.beginTransaction().add(R.id.fragment, moreFragment, "4").hide(moreFragment).commit();
 
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -59,12 +59,12 @@ public class MainActivity extends AppCompatActivity {
                         active[0] = settingsFragment;
                         return true;
 
-                    case R.id.More:
-                        Toast.makeText(MainActivity.this, "More", Toast.LENGTH_SHORT).show();
-                        fm.beginTransaction().hide(active[0]).show(moreFragment).commit();
-                        active[0] = moreFragment;
-
-                        return true;
+//                    case R.id.More:
+//                        Toast.makeText(MainActivity.this, "More", Toast.LENGTH_SHORT).show();
+//                        fm.beginTransaction().hide(active[0]).show(moreFragment).commit();
+//                        active[0] = moreFragment;
+//
+//                        return true;
                 }
                 return true;
             }
